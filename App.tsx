@@ -1,17 +1,21 @@
 /// <reference types="nativewind/types" />
 import 'react-native-gesture-handler';
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import StartScreen from './screens/StartScreen';
+import HomeScreen from './screens/HomeScreen';
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={() => <View><Text>Home</Text></View>} />
+      <Stack.Navigator initialRouteName='Start'>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Start" component={StartScreen} options={{
+          headerShown: false
+        }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

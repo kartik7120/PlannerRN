@@ -6,7 +6,12 @@ import StartScreen from './screens/StartScreen';
 import HomeScreen from './screens/HomeScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-const Stack = createStackNavigator();
+type RootStack = {
+  Home: undefined;
+  Start: undefined;
+}
+
+const Stack = createStackNavigator<RootStack>();
 
 export default function App() {
   return (

@@ -94,7 +94,7 @@ export default function StartScreen() {
     return (
         <SafeAreaView className='flex flex-col justify-evenly h-full'>
             <View>
-                <Text className='text-2xl text-center text-gray-500'>All-in-one Event Planner</Text>
+                <Text className='text-3xl text-center text-gray-500'>All-in-one Event Planner</Text>
                 <Text className='text-lg text-center'>
                     Keeps track of tasks manage guest list, control expenses, invite helpers and more
                 </Text>
@@ -109,12 +109,18 @@ export default function StartScreen() {
                 <Button containerStyle={{
                     display: 'flex',
                     flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }} title={<ButtonTitle />} buttonStyle={{
+                    width: "75%",
+                    display: 'flex',
+                    flexDirection: "row",
                     justifyContent: "space-around",
                     alignItems: "center",
-                }} title={<ButtonTitle />} icon={<MaskLogo width={64} height={64} fill={"white"} />} onPress={() => {
+                }} icon={<MaskLogo width={64} height={64} fill={"white"} />} onPress={() => {
                     setVisible2((prev) => !prev);
                 }} />
-                <Text className='text-center'>Already have an account? <Text onPress={LogIn} className='underline font-semibold '>Log in</Text></Text>
+                <Text className='text-center mt-2'>Already have an account? <Text onPress={LogIn} className='underline font-semibold '>Log in</Text></Text>
                 <StatusBar style="dark" />
                 <LogInDialog visible={visible} setVisible={setVisible} login={true} />
                 <LogInDialog visible={visible2} setVisible={setVisible2} login={false} />

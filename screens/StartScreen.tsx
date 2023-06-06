@@ -18,9 +18,14 @@ const LogInDialog = (props: LogInDialogProps) => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isLogin, setIsLogin] = useState(false);
 
     const toggle = () => {
         props.setVisible((prev) => !prev);
+    }
+
+    const toggleLogIn = () => {
+        setIsLogin((prev) => !prev);
     }
 
     return (
@@ -65,11 +70,11 @@ const LogInDialog = (props: LogInDialogProps) => {
                     <View>
                         <Input placeholder="Email" value={email} onChangeText={(text) => setEmail(() => text)} />
                         <Input placeholder="Password" secureTextEntry value={password} onChangeText={(text) => setPassword(() => text)} />
-                        <Button title="LOG IN" />
-                        <Text className='underline text-gray-600 text-center text-sm mt-2'>Forgot your password?</Text>
+                        <Button title={isLogin ? "LOG IN" : "SIGN UP"} />
+                        {isLogin ? <Text className='underline text-gray-600 text-center text-sm mt-2'>Forgot your password?</Text> : null}
                     </View>
                     <Divider width={1} />
-                    <Text className='text-center'>Don't have an account? <Text className='underline font-semibold'>Sign up</Text></Text>
+                    <Text className='text-center'>Don't have an account? <Text onPress={toggleLogIn} className='underline font-semibold'>{isLogin ? "Sign up" : "Log in"}</Text></Text>
                 </View>
             </Dialog>
         </KeyboardAvoidingView>

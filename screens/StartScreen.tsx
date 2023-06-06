@@ -92,7 +92,7 @@ export default function StartScreen() {
     }
 
     return (
-        <SafeAreaView className='flex flex-col justify-evenly '>
+        <SafeAreaView className='flex flex-col justify-evenly h-full'>
             <View>
                 <Text className='text-2xl text-center text-gray-500'>All-in-one Event Planner</Text>
                 <Text className='text-lg text-center'>
@@ -103,20 +103,22 @@ export default function StartScreen() {
                 aspectRatio: 1,
                 resizeMode: 'contain',
                 width: '100%',
-                height: '75%',
+                height: "auto",
             }} />
-            <Button containerStyle={{
-                display: 'flex',
-                flexDirection: "row",
-                justifyContent: "space-around",
-                alignItems: "center",
-            }} title={<ButtonTitle />} icon={<MaskLogo width={64} height={64} fill={"white"} />} onPress={() => {
-                setVisible2((prev) => !prev);
-            }}/>
-            <Text className='text-center'>Already have an account? <Text onPress={LogIn} className='underline font-semibold '>Log in</Text></Text>
-            <StatusBar style="dark" />
-            <LogInDialog visible={visible} setVisible={setVisible} login={true} />
-            <LogInDialog visible={visible2} setVisible={setVisible2} login={false} />
+            <View>
+                <Button containerStyle={{
+                    display: 'flex',
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                }} title={<ButtonTitle />} icon={<MaskLogo width={64} height={64} fill={"white"} />} onPress={() => {
+                    setVisible2((prev) => !prev);
+                }} />
+                <Text className='text-center'>Already have an account? <Text onPress={LogIn} className='underline font-semibold '>Log in</Text></Text>
+                <StatusBar style="dark" />
+                <LogInDialog visible={visible} setVisible={setVisible} login={true} />
+                <LogInDialog visible={visible2} setVisible={setVisible2} login={false} />
+            </View>
         </SafeAreaView>
     )
 }

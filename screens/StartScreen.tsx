@@ -12,13 +12,14 @@ import { Input } from '@rneui/themed';
 interface LogInDialogProps {
     visible: boolean;
     setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+    login: boolean;
 }
 
 const LogInDialog = (props: LogInDialogProps) => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [isLogin, setIsLogin] = useState(false);
+    const [isLogin, setIsLogin] = useState(props.login);
 
     const toggle = () => {
         props.setVisible((prev) => !prev);
@@ -74,7 +75,7 @@ const LogInDialog = (props: LogInDialogProps) => {
                         {isLogin ? <Text className='underline text-gray-600 text-center text-sm mt-2'>Forgot your password?</Text> : null}
                     </View>
                     <Divider width={1} />
-                    <Text className='text-center'>Don't have an account? <Text onPress={toggleLogIn} className='underline font-semibold'>{isLogin ? "Sign up" : "Log in"}</Text></Text>
+                    <Text className='text-center'>{isLogin ? "Don't have an account?" : "Already have and account?"} <Text onPress={toggleLogIn} className='underline font-semibold'>{isLogin ? "Sign up" : "Log in"}</Text></Text>
                 </View>
             </Dialog>
         </KeyboardAvoidingView>
@@ -84,7 +85,7 @@ const LogInDialog = (props: LogInDialogProps) => {
 export default function StartScreen() {
 
     const [visible, setVisible] = React.useState(false);
-
+    const [visible2, setVisible2] = useState(false);
 
     function LogIn() {
         setVisible((prev) => !prev);
@@ -109,10 +110,13 @@ export default function StartScreen() {
                 flexDirection: "row",
                 justifyContent: "space-around",
                 alignItems: "center",
-            }} title={<ButtonTitle />} icon={<MaskLogo width={64} height={64} fill={"white"} />} />
+            }} title={<ButtonTitle />} icon={<MaskLogo width={64} height={64} fill={"white"} />} onPress={() => {
+                setVisible2((prev) => !prev);
+            }}/>
             <Text className='text-center'>Already have an account? <Text onPress={LogIn} className='underline font-semibold '>Log in</Text></Text>
             <StatusBar style="dark" />
-            <LogInDialog visible={visible} setVisible={setVisible} />
+            <LogInDialog visible={visible} setVisible={setVisible} login={true} />
+            <LogInDialog visible={visible2} setVisible={setVisible2} login={false} />
         </SafeAreaView>
     )
 }

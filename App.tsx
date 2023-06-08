@@ -7,22 +7,47 @@ import HomeScreen from './screens/HomeScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ClerkProvider } from "@clerk/clerk-expo";
 import { CLERK_PUBLISHABLE_KEY } from "@env"
-type RootStack = {
+import * as SecureStore from "expo-secure-store";
+import StartNewScreen from './screens/StartNewScreen';
+import * as WebBrowser from "expo-web-browser";
+
+export type RootStack = {
   Home: undefined;
   Start: undefined;
+  StartNew: undefined;
 }
 
 const Stack = createStackNavigator<RootStack>();
 
+const tokenCache = {
+  async getToken(key: string) {
+    try {
+      return SecureStore.getItemAsync(key);
+    } catch (err) {
+      return null;
+    }
+  },
+  async saveToken(key: string, value: string) {
+    try {
+      return SecureStore.setItemAsync(key, value);
+    } catch (err) {
+      return;
+    }
+  },
+};
+
 export default function App() {
 
   return (
-    <ClerkProvider publishableKey={process.env.CLERK_PUBLISHABLE_KEY} >
+    <ClerkProvider tokenCache={tokenCache} publishableKey={process.env.CLERK_PUBLISHABLE_KEY}>
       <NavigationContainer>
         <SafeAreaProvider>
           <Stack.Navigator initialRouteName='Start'>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Start" component={StartScreen} options={{
+              headerShown: false
+            }} />
+            <Stack.Screen name="StartNew" component={StartNewScreen} options={{
               headerShown: false
             }} />
           </Stack.Navigator>

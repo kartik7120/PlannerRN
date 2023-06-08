@@ -8,6 +8,7 @@ import ButtonTitle from '../components/ButtonTitle';
 import MaskLogo from "../assets/carnivalMask.svg";
 import { Ionicons } from '@expo/vector-icons';
 import { Input } from '@rneui/themed';
+import { SignedIn, SignedOut, useSignUp } from '@clerk/clerk-expo';
 
 interface LogInDialogProps {
     visible: boolean;
@@ -20,6 +21,9 @@ const LogInDialog = (props: LogInDialogProps) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLogin, setIsLogin] = useState(props.login);
+    const { isLoaded, signUp, setActive } = useSignUp();
+    const [pendingVerification, setPendingVerification] = useState(false);
+    const [code, setCode] = useState("");
 
     const toggle = () => {
         props.setVisible((prev) => !prev);
@@ -27,6 +31,48 @@ const LogInDialog = (props: LogInDialogProps) => {
 
     const toggleLogIn = () => {
         setIsLogin((prev) => !prev);
+    }
+
+    const handleGoogleLogin = async () => {
+        console.log("Google login");
+    }
+
+    const signUpPress = async () => {
+        if (!isLoaded) {
+            return;
+        }
+
+        try {
+            await signUp.create({
+                emailAddress: email,
+                password: password,
+            })
+
+            await signUp.prepareEmailAddressVerification({
+                strategy: "email_code"
+            })
+
+            setPendingVerification(true);
+        } catch (error) {
+            console.error(JSON.stringify(error, null, 2));
+        }
+    }
+
+    const onPressVerify = async () => {
+        if (!isLoaded) {
+            return;
+        }
+
+        try {
+            const completeSignup = await signUp.attemptEmailAddressVerification({
+                code
+            })
+
+            await setActive({ session: completeSignup.createdSessionId });
+
+        } catch (error) {
+            console.error(JSON.stringify(error, null, 2));
+        }
     }
 
     return (
@@ -47,7 +93,7 @@ const LogInDialog = (props: LogInDialogProps) => {
                     </View>
                     <View className='flex flex-row justify-evenly w-full items-center'>
                         <Button radius="md" title={<Text className='font-semibold text-black'>Google</Text>}
-                            color="white" icon={<Ionicons name="logo-google" size={24} />} containerStyle={{
+                            color="white" onPress={handleGoogleLogin} icon={<Ionicons name="logo-google" size={24} />} containerStyle={{
                                 borderWidth: 1,
                                 borderColor: 'gray',
                                 width: 128,
@@ -69,9 +115,19 @@ const LogInDialog = (props: LogInDialogProps) => {
                     </View>
                     <Divider width={1} />
                     <View>
-                        <Input placeholder="Email" value={email} onChangeText={(text) => setEmail(() => text)} />
-                        <Input placeholder="Password" secureTextEntry value={password} onChangeText={(text) => setPassword(() => text)} />
-                        <Button title={isLogin ? "LOG IN" : "SIGN UP"} />
+                        {!pendingVerification && (
+                            <>
+                                <Input placeholder="Email" value={email} onChangeText={(text) => setEmail(() => text)} />
+                                <Input placeholder="Password" secureTextEntry value={password} onChangeText={(text) => setPassword(() => text)} />
+                                {isLogin ? <Button title="LOG IN" /> : <Button title={"SIGN UP"} onPress={signUpPress} />}
+                            </>
+                        )}
+                        {pendingVerification && (
+                            <>
+                                <Input placeholder="Verification Code" value={code} onChangeText={(text) => setCode(() => text)} />
+                                <Button title="VERIFY" onPress={onPressVerify} />
+                            </>
+                        )}
                         {isLogin ? <Text className='underline text-gray-600 text-center text-sm mt-2'>Forgot your password?</Text> : null}
                     </View>
                     <Divider width={1} />
@@ -86,6 +142,7 @@ export default function StartScreen() {
 
     const [visible, setVisible] = React.useState(false);
     const [visible2, setVisible2] = useState(false);
+
 
     function LogIn() {
         setVisible((prev) => !prev);
@@ -124,6 +181,12 @@ export default function StartScreen() {
                 <StatusBar style="dark" />
                 <LogInDialog visible={visible} setVisible={setVisible} login={true} />
                 <LogInDialog visible={visible2} setVisible={setVisible2} login={false} />
+                <SignedIn>
+                    <Text className='text-center mt-2'>You are signed in</Text>
+                </SignedIn>
+                <SignedOut>
+                    <Text className='text-center mt-2'>You are signed out</Text>
+                </SignedOut>
             </View>
         </SafeAreaView>
     )

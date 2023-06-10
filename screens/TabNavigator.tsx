@@ -6,17 +6,48 @@ import TabCheckListScreen from './TabCheckListScreen';
 import TabGuestScreen from './TabGuestScreen';
 import TabBudgetScreen from './TabBudgetScreen';
 import TabMenuScreen from './TabMenuScreen';
+import { AntDesign, Octicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
     return (
         <Tab.Navigator initialRouteName='First'>
-            <Tab.Screen name="First" component={TabHomeScreen} />
-            <Tab.Screen name="Checklist" component={TabCheckListScreen} />
-            <Tab.Screen name="Guests" component={TabGuestScreen} />
-            <Tab.Screen name="Budget" component={TabBudgetScreen} />
-            <Tab.Screen name="Menu" component={TabMenuScreen} />
+            <Tab.Screen name="First" component={TabHomeScreen} options={{
+                tabBarIcon: () => (<AntDesign name="home" size={24} color="black" />),
+                headerLeft: () => <AntDesign name="home" size={24} color="black" />,
+                headerLeftContainerStyle: {
+                    marginLeft: 10,
+                },
+            }} />
+            <Tab.Screen name="Checklist" component={TabCheckListScreen} options={{
+                tabBarIcon: () => (<Octicons name="checklist" size={24} color="black" />),
+                headerLeft: () => (<Octicons name="checklist" size={24} color="black" />),
+                headerLeftContainerStyle: {
+                    marginLeft: 10,
+                },
+            }} />
+            <Tab.Screen name="Guests" component={TabGuestScreen} options={{
+                tabBarIcon: () => (<AntDesign name="team" size={24} color="black" />),
+                headerLeft: () => <AntDesign name="team" size={24} color="black" />,
+                headerLeftContainerStyle: {
+                    marginLeft: 10,
+                },
+            }} />
+            <Tab.Screen name="Budget" component={TabBudgetScreen} options={{
+                tabBarIcon: () => (<AntDesign name="creditcard" size={24} color="black" />),
+                headerLeft: () => <AntDesign name="creditcard" size={24} color="black" />,
+                headerLeftContainerStyle: {
+                    marginLeft: 10,
+                },
+            }} />
+            <Tab.Screen name="Menu" component={TabMenuScreen} options={{
+                tabBarIcon: () => (<AntDesign name="menufold" size={24} color="black" />),
+                headerLeft: () => <AntDesign name="menufold" size={24} color="black" />,
+                headerLeftContainerStyle: {
+                    marginLeft: 10,
+                },
+            }} />
         </Tab.Navigator>
     )
 }

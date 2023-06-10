@@ -48,7 +48,7 @@ export default function App() {
               headerShown: false
             }} />
             <Stack.Screen name="StartNew" component={StartNewScreen} options={{
-              headerShown: false
+              headerShown: false,
             }} />
           </Stack.Navigator>
         </SafeAreaProvider>

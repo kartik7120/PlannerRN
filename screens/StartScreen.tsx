@@ -1,5 +1,5 @@
 import { View, Text, Pressable, KeyboardAvoidingView, Platform } from 'react-native'
-import React, { useState } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Dialog, Image, Divider } from '@rneui/themed';
@@ -8,7 +8,12 @@ import ButtonTitle from '../components/ButtonTitle';
 import MaskLogo from "../assets/carnivalMask.svg";
 import { Ionicons } from '@expo/vector-icons';
 import { Input } from '@rneui/themed';
-import { SignedIn, SignedOut, useSignUp } from '@clerk/clerk-expo';
+import { SignedIn, SignedOut, useAuth, useOAuth, useSignIn, useSignUp } from '@clerk/clerk-expo';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import { RootStack } from '../App';
+import * as WebBrowser from "expo-web-browser";
+import { useWarmUpBrowser } from "../hooks/WarmUpBrowser";
 
 interface LogInDialogProps {
     visible: boolean;
@@ -16,14 +21,24 @@ interface LogInDialogProps {
     login: boolean;
 }
 
+type StartScreenNavigationProps = StackNavigationProp<RootStack, "Start">;
+
+WebBrowser.maybeCompleteAuthSession();
+
 const LogInDialog = (props: LogInDialogProps) => {
+
+    useWarmUpBrowser();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLogin, setIsLogin] = useState(props.login);
     const { isLoaded, signUp, setActive } = useSignUp();
+    const { signIn, setActive: signInSetActive, isLoaded: isSignInLoaded } = useSignIn();
+    const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
+    const [error, setError] = useState("");
     const [pendingVerification, setPendingVerification] = useState(false);
     const [code, setCode] = useState("");
+    const navigation = useNavigation<StartScreenNavigationProps>();
 
     const toggle = () => {
         props.setVisible((prev) => !prev);
@@ -31,10 +46,6 @@ const LogInDialog = (props: LogInDialogProps) => {
 
     const toggleLogIn = () => {
         setIsLogin((prev) => !prev);
-    }
-
-    const handleGoogleLogin = async () => {
-        console.log("Google login");
     }
 
     const signUpPress = async () => {
@@ -53,8 +64,9 @@ const LogInDialog = (props: LogInDialogProps) => {
             })
 
             setPendingVerification(true);
-        } catch (error) {
+        } catch (error: any) {
             console.error(JSON.stringify(error, null, 2));
+            setError(error.message);
         }
     }
 
@@ -69,11 +81,45 @@ const LogInDialog = (props: LogInDialogProps) => {
             })
 
             await setActive({ session: completeSignup.createdSessionId });
+            navigation.replace("Home");
+        } catch (error: any) {
+            console.error(JSON.stringify(error, null, 2));
+            setError(error.message);
+        }
+    }
 
+    const onSignInPress = async () => {
+
+        if (!isSignInLoaded) return;
+
+        try {
+            const completeSignIn = await signIn.create({
+                identifier: email,
+                password: password,
+            })
+            await signInSetActive({ session: completeSignIn.createdSessionId });
+            navigation.replace("Home");
         } catch (error) {
             console.error(JSON.stringify(error, null, 2));
         }
     }
+
+    const onPress = React.useCallback(async () => {
+        console.log(`Starting OAuth flow`)
+        try {
+            const { createdSessionId, signIn, signUp, setActive } =
+                await startOAuthFlow();
+
+            if (createdSessionId) {
+                setActive({ session: createdSessionId });
+            } else {
+                // Use signIn or signUp for next steps such as MFA
+            }
+        } catch (err) {
+            console.error("OAuth error", err);
+        }
+    }, []);
+
 
     return (
         <KeyboardAvoidingView
@@ -93,17 +139,7 @@ const LogInDialog = (props: LogInDialogProps) => {
                     </View>
                     <View className='flex flex-row justify-evenly w-full items-center'>
                         <Button radius="md" title={<Text className='font-semibold text-black'>Google</Text>}
-                            color="white" onPress={handleGoogleLogin} icon={<Ionicons name="logo-google" size={24} />} containerStyle={{
-                                borderWidth: 1,
-                                borderColor: 'gray',
-                                width: 128,
-                            }} buttonStyle={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                justifyContent: 'space-evenly',
-                            }} />
-                        <Button radius="md" title={<Text className='font-semibold text-black'>Facebook</Text>}
-                            color="white" icon={<Ionicons name="logo-facebook" size={24} />} containerStyle={{
+                            color="white" onPress={onPress} icon={<Ionicons name="logo-google" size={24} />} containerStyle={{
                                 borderWidth: 1,
                                 borderColor: 'gray',
                                 width: 128,
@@ -119,7 +155,7 @@ const LogInDialog = (props: LogInDialogProps) => {
                             <>
                                 <Input placeholder="Email" value={email} onChangeText={(text) => setEmail(() => text)} />
                                 <Input placeholder="Password" secureTextEntry value={password} onChangeText={(text) => setPassword(() => text)} />
-                                {isLogin ? <Button title="LOG IN" /> : <Button title={"SIGN UP"} onPress={signUpPress} />}
+                                {isLogin ? <Button title="LOG IN" onPress={onSignInPress} /> : <Button title={"SIGN UP"} onPress={signUpPress} />}
                             </>
                         )}
                         {pendingVerification && (
@@ -130,6 +166,7 @@ const LogInDialog = (props: LogInDialogProps) => {
                         )}
                         {isLogin ? <Text className='underline text-gray-600 text-center text-sm mt-2'>Forgot your password?</Text> : null}
                     </View>
+                    {error.length > 0 ? <Text>{error}</Text> : ""}
                     <Divider width={1} />
                     <Text className='text-center'>{isLogin ? "Don't have an account?" : "Already have and account?"} <Text onPress={toggleLogIn} className='underline font-semibold'>{isLogin ? "Sign up" : "Log in"}</Text></Text>
                 </View>
@@ -142,11 +179,18 @@ export default function StartScreen() {
 
     const [visible, setVisible] = React.useState(false);
     const [visible2, setVisible2] = useState(false);
-
+    const { isSignedIn } = useAuth();
+    const navigation = useNavigation<StartScreenNavigationProps>();
 
     function LogIn() {
         setVisible((prev) => !prev);
     }
+
+    useLayoutEffect(() => {
+        if (isSignedIn) {
+            navigation.replace("StartNew");
+        }
+    }, [isSignedIn])
 
     return (
         <SafeAreaView className='flex flex-col justify-evenly h-full'>

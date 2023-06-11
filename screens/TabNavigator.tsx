@@ -19,6 +19,7 @@ const TabNavigator = () => {
                 headerLeftContainerStyle: {
                     marginLeft: 10,
                 },
+                title: 'Home',
             }} />
             <Tab.Screen name="Checklist" component={TabCheckListScreen} options={{
                 tabBarIcon: () => (<Octicons name="checklist" size={24} color="black" />),

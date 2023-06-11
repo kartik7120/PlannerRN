@@ -4,6 +4,9 @@ import { Button, Dialog, Image, Input } from '@rneui/themed';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { AntDesign } from '@expo/vector-icons';
 import { useForm, Controller } from "react-hook-form";
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStack } from '../App';
 
 interface Props {
     visible: boolean;
@@ -29,6 +32,8 @@ export default function NewEvent(props: Props) {
             time: "",
         }
     });
+
+    const navigation = useNavigation<StackNavigationProp<RootStack, 'StartNew'>>();
 
     const showDatePicker = () => {
         setDatePickerVisibility(true);
@@ -62,7 +67,13 @@ export default function NewEvent(props: Props) {
         props.setVisible(!props.visible);
     }
 
-    const submit = (data: Form) => {
+    const submit = async (data: Form) => {
+        try {
+            
+        } catch (error) {
+
+        }
+        navigation.navigate("Home")
         console.log(data);
     }
 
@@ -104,7 +115,7 @@ export default function NewEvent(props: Props) {
                             onChangeText={onChange} />
                     )}
                     name="Budget"
-                    rules={{ required: true ,pattern: /^[0-9]*$/}}
+                    rules={{ required: true, pattern: /^[0-9]*$/ }}
                 />
             </View>
             <Button title="Create" onPress={handleSubmit(submit)} />
@@ -130,15 +141,16 @@ export default function NewEvent(props: Props) {
                         mode="time"
                         onConfirm={handleTimeConfirm}
                         onCancel={hideTimePicker}
+                        onChange={onChange}
                     />
                 )}
                 name="time"
                 rules={{ required: true }}
             />
-            {errors.date && <Text>Date is required.</Text>}
-            {errors.time && <Text>Time is required.</Text>}
-            {errors.name && <Text>Name is required.</Text>}
-            {errors.Budget && <Text>Budget is required.</Text>}
+            {errors.date && <Text className='text-red-600 font-semibold text-lg'>Date is required.</Text>}
+            {errors.time && <Text className='text-red-600 font-semibold text-lg'>Time is required.</Text>}
+            {errors.name && <Text className='text-red-600 font-semibold text-lg'>Name is required.</Text>}
+            {errors.Budget && <Text className='text-red-600 font-semibold text-lg'>Budget is required.</Text>}
         </Dialog>
     )
 }

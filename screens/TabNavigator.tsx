@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import TabHomeScreen from './TabHomeScreen';
@@ -18,6 +18,14 @@ const TabNavigator = () => {
                 headerLeft: () => <AntDesign name="home" size={24} color="black" />,
                 headerLeftContainerStyle: {
                     marginLeft: 10,
+                },
+                headerRight: (() => (
+                    <TouchableOpacity>
+                        <AntDesign name="message1" size={24} color="black" />
+                    </TouchableOpacity>
+                )),
+                headerRightContainerStyle: {
+                    marginRight: 10,
                 },
                 title: 'Home',
             }} />

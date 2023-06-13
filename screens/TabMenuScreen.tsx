@@ -5,8 +5,21 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Feather } from '@expo/vector-icons';
 import { AntDesign, Octicons, MaterialIcons } from '@expo/vector-icons';
 import CarnivalMask from '../assets/carnivalMask.svg';
+import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
+import { RootTab } from './TabNavigator';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { RootStack } from '../App';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+type MenuScreenProps = CompositeNavigationProp<
+  BottomTabNavigationProp<RootTab, 'Menu'>,
+  StackNavigationProp<RootStack>
+>
 
 export default function TabMenuScreen() {
+
+  const navigation = useNavigation<MenuScreenProps>();
+
   return (
     <ScrollView>
       {/* Upper part */}
@@ -43,7 +56,9 @@ export default function TabMenuScreen() {
       </View>
       {/* Middle part */}
       <View className='bg-white m-2 rounded-lg overflow-hidden'>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate('First');
+        }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>
               <AntDesign name="home" size={24} color="black" />
@@ -53,7 +68,9 @@ export default function TabMenuScreen() {
           </View>
         </TouchableOpacity>
         <Divider />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate('Checklist');
+        }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>
               <Octicons name="checklist" size={24} color="black" />
@@ -63,7 +80,9 @@ export default function TabMenuScreen() {
           </View>
         </TouchableOpacity>
         <Divider />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate("Guests")
+        }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>
               <AntDesign name="team" size={24} color="black" />
@@ -73,7 +92,9 @@ export default function TabMenuScreen() {
           </View>
         </TouchableOpacity>
         <Divider />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate('Budget');
+        }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>
               <AntDesign name="creditcard" size={24} color="black" />
@@ -83,7 +104,9 @@ export default function TabMenuScreen() {
           </View>
         </TouchableOpacity>
         <Divider />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate('Vendors');
+        }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>
               <AntDesign name="contacts" size={24} color="black" />
@@ -93,7 +116,9 @@ export default function TabMenuScreen() {
           </View>
         </TouchableOpacity>
         <Divider />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate("Schedule");
+        }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>
               <MaterialIcons name="schedule" size={24} color="black" />
@@ -104,7 +129,9 @@ export default function TabMenuScreen() {
         </TouchableOpacity>
       </View>
       <View className='bg-white m-2 rounded-lg overflow-hidden'>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate('Events');
+        }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>
               <AntDesign name="staro" size={24} color="black" />
@@ -114,7 +141,9 @@ export default function TabMenuScreen() {
           </View>
         </TouchableOpacity>
         <Divider />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate("Helpers")
+        }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>
               <MaterialIcons name="groups" size={24} color="black" />
@@ -124,7 +153,9 @@ export default function TabMenuScreen() {
           </View>
         </TouchableOpacity>
         <Divider />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate('Messages');
+        }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>
               <AntDesign name="message1" size={24} color="black" />
@@ -134,7 +165,9 @@ export default function TabMenuScreen() {
           </View>
         </TouchableOpacity>
         <Divider />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate('Settings');
+        }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>
               <AntDesign name="setting" size={24} color="black" />

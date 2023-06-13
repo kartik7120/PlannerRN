@@ -8,7 +8,15 @@ import TabBudgetScreen from './TabBudgetScreen';
 import TabMenuScreen from './TabMenuScreen';
 import { AntDesign, Octicons } from '@expo/vector-icons';
 
-const Tab = createBottomTabNavigator();
+export type RootTab = {
+    First: undefined;
+    Checklist: undefined;
+    Guests: undefined;
+    Budget: undefined;
+    Menu: undefined;
+}
+
+const Tab = createBottomTabNavigator<RootTab>();
 
 const TabNavigator = () => {
     return (

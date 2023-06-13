@@ -9,11 +9,23 @@ import { CLERK_PUBLISHABLE_KEY } from "@env"
 import * as SecureStore from "expo-secure-store";
 import StartNewScreen from './screens/StartNewScreen';
 import TabNavigator from './screens/TabNavigator';
+import Vendors from './screens/Vendors';
+import Settings from './screens/Settings';
+import Messages from './screens/Messages';
+import Helpers from './screens/Helpers';
+import Events from './screens/Events';
+import Schedule from './screens/Schedule';
 
 export type RootStack = {
   Home: undefined;
   Start: undefined;
   StartNew: undefined;
+  Vendors: undefined;
+  Settings: undefined;
+  Messages: undefined;
+  Helpers: undefined;
+  Events: undefined;
+  Schedule: undefined;
 }
 
 const Stack = createStackNavigator<RootStack>();
@@ -44,12 +56,30 @@ export default function App() {
           <Stack.Navigator initialRouteName='Home'>
             <Stack.Screen name="Home" component={TabNavigator} options={{
               headerShown: false
-            }}/>
+            }} />
             <Stack.Screen name="Start" component={StartScreen} options={{
               headerShown: false
             }} />
             <Stack.Screen name="StartNew" component={StartNewScreen} options={{
               headerShown: false,
+            }} />
+            <Stack.Screen name="Vendors" component={Vendors} options={{
+              presentation: "modal"
+            }} />
+            <Stack.Screen name="Settings" component={Settings} options={{
+              presentation: "modal"
+            }} />
+            <Stack.Screen name="Messages" component={Messages} options={{
+              presentation: "modal"
+            }} />
+            <Stack.Screen name="Helpers" component={Helpers} options={{
+              presentation: "modal"
+            }} />
+            <Stack.Screen name="Events" component={Events} options={{
+              presentation: "modal"
+            }} />
+            <Stack.Screen name="Schedule" component={Schedule} options={{
+              presentation: "modal"
             }} />
           </Stack.Navigator>
         </SafeAreaProvider>

@@ -43,86 +43,106 @@ export default function TabMenuScreen() {
       </View>
       {/* Middle part */}
       <View className='bg-white m-2 rounded-lg overflow-hidden'>
-        <View className='flex flex-row justify-between items-center p-2'>
-          <View className='flex flex-row gap-x-3 items-center'>
-            <AntDesign name="home" size={24} color="black" />
-            <Text className='text-lg font-light'>Home</Text>
+        <TouchableOpacity>
+          <View className='flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-3 items-center'>
+              <AntDesign name="home" size={24} color="black" />
+              <Text className='text-lg font-light'>Home</Text>
+            </View>
+            <AntDesign name="right" size={24} color="black" />
           </View>
-          <AntDesign name="right" size={24} color="black" />
-        </View>
+        </TouchableOpacity>
         <Divider />
-        <View className='flex flex-row justify-between items-center p-2'>
-          <View className='flex flex-row gap-x-3 items-center'>
-            <Octicons name="checklist" size={24} color="black" />
-            <Text className='text-lg font-light'>Checklist</Text>
+        <TouchableOpacity>
+          <View className='flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-3 items-center'>
+              <Octicons name="checklist" size={24} color="black" />
+              <Text className='text-lg font-light'>Checklist</Text>
+            </View>
+            <AntDesign name="right" size={24} color="black" />
           </View>
-          <AntDesign name="right" size={24} color="black" />
-        </View>
+        </TouchableOpacity>
         <Divider />
-        <View className='flex flex-row justify-between items-center p-2'>
-          <View className='flex flex-row gap-x-3 items-center'>
-            <AntDesign name="team" size={24} color="black" />
-            <Text className='text-lg font-light'>Guests</Text>
+        <TouchableOpacity>
+          <View className='flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-3 items-center'>
+              <AntDesign name="team" size={24} color="black" />
+              <Text className='text-lg font-light'>Guests</Text>
+            </View>
+            <AntDesign name="right" size={24} color="black" />
           </View>
-          <AntDesign name="right" size={24} color="black" />
-        </View>
+        </TouchableOpacity>
         <Divider />
-        <View className='flex flex-row justify-between items-center p-2'>
-          <View className='flex flex-row gap-x-3 items-center'>
-            <AntDesign name="creditcard" size={24} color="black" />
-            <Text className='text-lg font-light'>Budget</Text>
+        <TouchableOpacity>
+          <View className='flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-3 items-center'>
+              <AntDesign name="creditcard" size={24} color="black" />
+              <Text className='text-lg font-light'>Budget</Text>
+            </View>
+            <AntDesign name="right" size={24} color="black" />
           </View>
-          <AntDesign name="right" size={24} color="black" />
-        </View>
+        </TouchableOpacity>
         <Divider />
-        <View className='flex flex-row justify-between items-center p-2'>
-          <View className='flex flex-row gap-x-3 items-center'>
-            <AntDesign name="contacts" size={24} color="black" />
-            <Text className='text-lg font-light'>Vendors</Text>
+        <TouchableOpacity>
+          <View className='flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-3 items-center'>
+              <AntDesign name="contacts" size={24} color="black" />
+              <Text className='text-lg font-light'>Vendors</Text>
+            </View>
+            <AntDesign name="right" size={24} color="black" />
           </View>
-          <AntDesign name="right" size={24} color="black" />
-        </View>
+        </TouchableOpacity>
         <Divider />
-        <View className='flex flex-row justify-between items-center p-2'>
-          <View className='flex flex-row gap-x-3 items-center'>
-            <MaterialIcons name="schedule" size={24} color="black" />
-            <Text className='text-lg font-light'>Schedule</Text>
+        <TouchableOpacity>
+          <View className='flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-3 items-center'>
+              <MaterialIcons name="schedule" size={24} color="black" />
+              <Text className='text-lg font-light'>Schedule</Text>
+            </View>
+            <AntDesign name="right" size={24} color="black" />
           </View>
-          <AntDesign name="right" size={24} color="black" />
-        </View>
+        </TouchableOpacity>
       </View>
       <View className='bg-white m-2 rounded-lg overflow-hidden'>
-        <View className='flex flex-row justify-between items-center p-2'>
-          <View className='flex flex-row gap-x-3 items-center'>
-            <AntDesign name="staro" size={24} color="black" />
-            <Text className='text-lg font-light'>Events</Text>
+        <TouchableOpacity>
+          <View className='flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-3 items-center'>
+              <AntDesign name="staro" size={24} color="black" />
+              <Text className='text-lg font-light'>Events</Text>
+            </View>
+            <AntDesign name="right" size={24} color="black" />
           </View>
-          <AntDesign name="right" size={24} color="black" />
-        </View>
+        </TouchableOpacity>
         <Divider />
-        <View className='flex flex-row justify-between items-center p-2'>
-          <View className='flex flex-row gap-x-3 items-center'>
-            <MaterialIcons name="groups" size={24} color="black" />
-            <Text className='text-lg font-light'>Helpers</Text>
+        <TouchableOpacity>
+          <View className='flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-3 items-center'>
+              <MaterialIcons name="groups" size={24} color="black" />
+              <Text className='text-lg font-light'>Helpers</Text>
+            </View>
+            <AntDesign name="right" size={24} color="black" />
           </View>
-          <AntDesign name="right" size={24} color="black" />
-        </View>
+        </TouchableOpacity>
         <Divider />
-        <View className='flex flex-row justify-between items-center p-2'>
-          <View className='flex flex-row gap-x-3 items-center'>
-            <AntDesign name="message1" size={24} color="black" />
-            <Text className='text-lg font-light'>Messages</Text>
+        <TouchableOpacity>
+          <View className='flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-3 items-center'>
+              <AntDesign name="message1" size={24} color="black" />
+              <Text className='text-lg font-light'>Messages</Text>
+            </View>
+            <AntDesign name="right" size={24} color="black" />
           </View>
-          <AntDesign name="right" size={24} color="black" />
-        </View>
+        </TouchableOpacity>
         <Divider />
-        <View className='flex flex-row justify-between items-center p-2'>
-          <View className='flex flex-row gap-x-3 items-center'>
-            <AntDesign name="setting" size={24} color="black" />
-            <Text className='text-lg font-light'>Settings</Text>
+        <TouchableOpacity>
+          <View className='flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-3 items-center'>
+              <AntDesign name="setting" size={24} color="black" />
+              <Text className='text-lg font-light'>Settings</Text>
+            </View>
+            <AntDesign name="right" size={24} color="black" />
           </View>
-          <AntDesign name="right" size={24} color="black" />
-        </View>
+        </TouchableOpacity>
       </View>
       <View className='bg-white m-2 rounded-lg overflow-hidden p-4'>
         <View className='flex flex-row justify-around items-center'>

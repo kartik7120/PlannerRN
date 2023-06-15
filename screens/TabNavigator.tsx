@@ -57,6 +57,14 @@ const TabNavigator = () => {
                 headerLeftContainerStyle: {
                     marginLeft: 10,
                 },
+                headerRight: (() => (
+                    <TouchableOpacity>
+                        <AntDesign name="message1" size={24} color="black" />
+                    </TouchableOpacity>
+                )),
+                headerRightContainerStyle: {
+                    marginRight: 10,
+                },
             }} />
             <Tab.Screen name="Menu" component={TabMenuScreen} options={{
                 tabBarIcon: () => (<AntDesign name="menufold" size={24} color="black" />),

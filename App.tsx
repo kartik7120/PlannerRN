@@ -15,6 +15,7 @@ import Messages from './screens/Messages';
 import Helpers from './screens/Helpers';
 import Events from './screens/Events';
 import Schedule from './screens/Schedule';
+import BudgetModal from './screens/BudgetModal';
 
 export type RootStack = {
   Home: undefined;
@@ -26,6 +27,7 @@ export type RootStack = {
   Helpers: undefined;
   Events: undefined;
   Schedule: undefined;
+  BudgetModal: undefined;
 }
 
 const Stack = createStackNavigator<RootStack>();
@@ -80,6 +82,10 @@ export default function App() {
             }} />
             <Stack.Screen name="Schedule" component={Schedule} options={{
               presentation: "modal"
+            }} />
+            <Stack.Screen name="BudgetModal" component={BudgetModal} options={{
+              presentation: "modal",
+              title: "Add a new cost"
             }} />
           </Stack.Navigator>
         </SafeAreaProvider>

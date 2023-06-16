@@ -5,6 +5,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStack } from '../App';
 import { useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 
 export default function GuestScreen() {
 
@@ -40,6 +41,7 @@ export default function GuestScreen() {
                     <AntDesign name="plus" size={24} color="black" />
                 } placement='right' />
             </View>
+            <StatusBar style="dark" />
         </>
     )
 }

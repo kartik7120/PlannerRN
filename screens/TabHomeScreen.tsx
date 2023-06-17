@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Timer from '../components/Timer'
-import { Button, Image } from '@rneui/themed'
+import { Button, ButtonGroup, Image } from '@rneui/themed'
 import { Feather, AntDesign } from '@expo/vector-icons';
 import { Divider } from '@rneui/themed';
 import { LinearProgress } from '@rneui/themed';
@@ -10,47 +10,34 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   PieChart,
 } from "react-native-chart-kit";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { doc, getDoc, onSnapshot } from "firebase/firestore"
+import { db } from '../firebase';
+import Tick from "../assets/tick.svg";
 
 export default function TabHomeScreen() {
 
-  const data = [
-    {
-      name: "Seoul",
-      population: 21500000,
-      color: "rgba(131, 167, 234, 1)",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 15
-    },
-    {
-      name: "Toronto",
-      population: 2800000,
-      color: "#F00",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 15
-    },
-    {
-      name: "Beijing",
-      population: 527612,
-      color: "red",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 15
-    },
-    {
-      name: "New York",
-      population: 8538000,
-      color: "#ffffff",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 15
-    },
-    {
-      name: "Moscow",
-      population: 11920000,
-      color: "rgb(0, 0, 255)",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 15
-    }
-  ];
+  const [event, setEvent] = useState<any>();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    (async function lloadCurrentEvent() {
+      const currentEventId = await AsyncStorage.getItem('currentEventId');
+
+      if (currentEventId === null) {
+        return;
+      }
+      const docRef = doc(db, "events", currentEventId);
+
+      const unsubscribe = onSnapshot(docRef, (doc) => {
+        const data = doc.data();
+        setEvent(data);
+        console.log(`data for current event : ${JSON.stringify(data)}`);
+      })
+
+      return unsubscribe;
+    })()
+  }, [])
 
   return (
     <ScrollView>
@@ -62,17 +49,56 @@ export default function TabHomeScreen() {
               style={{ width: 50, height: 50, borderRadius: 50 / 2 }}
             />
             <View>
-              <Text className='text-lg text-black'>Event title</Text>
+              <Text className='text-lg text-black'>{event && event.name || "Event name"}</Text>
               <View className='flex flex-row gap-x-2'>
                 <Text className='text-gray-400'>Date</Text>
                 <Text className='text-gray-400'>Your event</Text>
               </View>
             </View>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => setVisible(!visible)}>
             <Feather name="menu" size={24} color="black" />
           </TouchableOpacity>
         </View>
+        {visible && <>
+          <View className='bg-white flex flex-row justify-between items-center p-2'>
+            <View className='flex flex-row gap-x-2 items-center'>
+              <Octicons name="feed-star" size={24} color="black" />
+              <Text className='text-black font-normal text-lg'>EVENTS</Text>
+            </View>
+            <TouchableOpacity onPress={() => {
+              setVisible(false);
+            }}>
+              <AntDesign name="close" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
+          <View className='flex flex-row justify-between items-center w-full p-2 bg-white'>
+            <View className=' flex flex-row gap-x-3'>
+              <Image source={require("../assets/event_icon.jpg")}
+                style={{ width: 50, height: 50, borderRadius: 50 / 2 }}
+              />
+              <View>
+                <Text className='text-lg text-black'>{event && event.name || "Event name"}</Text>
+                <View className='flex flex-row gap-x-2'>
+                  <Text className='text-gray-400'>Date</Text>
+                  <Text className='text-gray-400'>Your event</Text>
+                </View>
+              </View>
+            </View>
+            <View>
+              <Tick width={32} height={32} />
+            </View>
+          </View>
+          <View className='flex flex-row justify-between items-center bg-white mt-2 gap-x-1'>
+            <View className='basis-1/2'>
+              <Button title="JOIN" type='outline' />
+            </View>
+            <View className='basis-1/2'>
+              <Button type='solid' title="CREATE" />
+            </View>
+          </View>
+        </>
+        }
       </View>
       {/* Menu */}
       <View className='bg-white p-3 border rounded-lg border-transparent overflow-hidden m-2'>

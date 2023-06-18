@@ -3,7 +3,7 @@ import React from 'react'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import TopTabEvent from './TopTabEvent';
 
-type TopTabTabs<T> = {
+export type TopTabTabs<T> = {
   Attire: {
     [key in keyof T]: T[key]
   };
@@ -36,7 +36,7 @@ type TopTabTabs<T> = {
   };
 }
 
-type ParamsForTopTab = {
+export type ParamsForTopTab = {
   title: string;
 }
 

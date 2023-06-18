@@ -1,5 +1,5 @@
 import { View, Text, TextInput } from 'react-native';
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { Button, Dialog, Image, Input } from '@rneui/themed';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { AntDesign } from '@expo/vector-icons';
@@ -7,6 +7,10 @@ import { useForm, Controller } from "react-hook-form";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStack } from '../App';
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useUser } from '@clerk/clerk-expo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
     visible: boolean;
@@ -16,6 +20,8 @@ interface Props {
 interface Form {
     name: string;
     Budget: string;
+    date: string;
+    time: string;
 }
 
 export default function NewEvent(props: Props) {
@@ -34,6 +40,18 @@ export default function NewEvent(props: Props) {
     });
 
     const navigation = useNavigation<StackNavigationProp<RootStack, 'StartNew'>>();
+    const { user, isSignedIn } = useUser();
+
+    useLayoutEffect(() => {
+        async function checkOneEvent() {
+            const currentEventId = await AsyncStorage.getItem('currentEventId');
+            console.log(`current event id is ${currentEventId}`);
+            if (currentEventId !== null) {
+                navigation.navigate("Home");
+            }
+        }
+        checkOneEvent();
+    }, [])
 
     const showDatePicker = () => {
         setDatePickerVisibility(true);
@@ -68,12 +86,29 @@ export default function NewEvent(props: Props) {
     }
 
     const submit = async (data: Form) => {
-        try {
-            
-        } catch (error) {
-
+        if (isSignedIn) {
+            console.log('making a new event');
+            try {
+                const colRef = collection(db, "events");
+                await addDoc(colRef, {
+                    name: data.name,
+                    Budget: data.Budget,
+                    date: data.date,
+                    time: data.time,
+                    userId: user?.id
+                }).then(async (data) => {
+                    try {
+                        await AsyncStorage.setItem("currentEventId", data.id);
+                    } catch (error) {
+                        console.log('error occured while saving current event id');
+                        console.log(error);
+                    }
+                })
+            } catch (error) {
+                console.log('error occured while creating event', error);
+            }
+            navigation.navigate("Home")
         }
-        navigation.navigate("Home")
         console.log(data);
     }
 

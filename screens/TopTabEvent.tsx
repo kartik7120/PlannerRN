@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import React, { useEffect } from 'react';
 import { Image } from '@rneui/themed';
 import { FAB } from '@rneui/themed';
@@ -54,16 +54,29 @@ export default function TopTabEvent() {
     <>
       {items.length > 0 ? (
         items.map((item) => (
-          <View className='bg-white p-2 rounded-lg overflow-hidden m-2 flex flex-col gap-y-2'>
-            <Text className='text-xl'>{item.name}</Text>
-            <LinearProgress value={item.amount % item.paid} animation={{
-              duration: 1000,
-            }} />
-            <View className='flex flex-row justify-between items-center'>
-              <Text className='text-gray-500 text-lg'>Paid {item.paid}</Text>
-              <Text className='text-gray-500 text-lg'>Amount: {item.amount}</Text>
+          <TouchableOpacity key={item.id} onPress={() => {
+            navigation.navigate("BudgetItemModal", {
+              title: route.params.title,
+              id: item.id,
+              category: item.category,
+              name: item.name,
+              amount: item.amount,
+              paid: item.paid,
+              note: item.note,
+              pending: item.pending,
+            })
+          }}>
+            <View className='bg-white p-2 rounded-lg overflow-hidden m-2 flex flex-col gap-y-2'>
+              <Text className='text-xl'>{item.name}</Text>
+              <LinearProgress value={Number((Number(item.paid) / Number(item.amount)).toFixed(2))} animation={{
+                duration: 1000,
+              }} />
+              <View className='flex flex-row justify-between items-center'>
+                <Text className='text-gray-500 text-lg'>Paid {item.paid}</Text>
+                <Text className='text-gray-500 text-lg'>Amount: {item.amount}</Text>
+              </View>
             </View>
-          </View>))) : (
+          </TouchableOpacity>))) : (
         <View className='flex flex-col justify-center h-full items-center'>
           <Image source={require("../assets/not_found.png")} alt="Not Found" style={{
             width: 100,

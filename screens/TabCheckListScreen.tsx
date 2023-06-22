@@ -1,7 +1,7 @@
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import React, { useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, doc, getDoc, getDocs, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import CheckListScreen from './CheckListScreen';
@@ -75,26 +75,52 @@ export default function TabCheckListScreen() {
     getCheckList();
   }, [])
 
+  async function updateCheckList(id: string, completed: string) {
+    try {
+      const eventId = await AsyncStorage.getItem('currentEventId');
+      if (!eventId) throw new Error('No event id found');
+      const docRef = doc(db, 'events', eventId, "checklist", id);
+      await updateDoc(docRef, {
+        completed: completed,
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <ScrollView className='h-full'>
       {event && event?.length > 0 ? (
         <View className='flex flex-col gap-y-2 m-2'>
           {event.map((item, index) => (
             <ListItem key={item.id} bottomDivider>
-              <ListItem.CheckBox checked={item.checked} />
+              <ListItem.CheckBox checked={item.completed === "Completed" ? true : false} onPress={() => {
+                updateCheckList(item.id, item.completed === "Completed" ? "Pending" : "Completed")
+              }} />
               <ListItem.Content style={{
                 width: "100%",
                 borderRadius: 10,
               }}>
-                <View key={item.id} className='bg-white rounded-lg overflow-hidden w-full p-2 flex flex-col gap-y-2'>
-                  <Text className='text-lg '>{item.name}</Text>
-                  <View className='flex flex-row justify-between items-center'>
-                    <View className='flex flex-row gap-x-1'>
-                      <Text> {returnCategoryIcon(item.category)}</Text>
-                      <Text className='text-md text-gray-500'>{item.category}</Text>
+                <View key={item.id} className='bg-white rounded-lg overflow-hidden w-full pl-2 pr-2 pt-1 pb-1 flex flex-col gap-y-2'>
+                  <TouchableOpacity onPress={() => {
+                    navigation.navigate('CheckListDetail', {
+                      name: item.name,
+                      note: item.note,
+                      category: item.category,
+                      date: item.date,
+                      completed: item.completed,
+                      id: item.id,
+                    })
+                  }}>
+                    <Text className='text-lg '>{item.name}</Text>
+                    <View className='flex flex-row justify-between items-center'>
+                      <View className='flex flex-row gap-x-1'>
+                        <Text> {returnCategoryIcon(item.category)}</Text>
+                        <Text className='text-md text-gray-500'>{item.category}</Text>
+                      </View>
+                      <Text className='text-orange-500'>Date</Text>
                     </View>
-                    <Text className='text-orange-500'>Date</Text>
-                  </View>
+                  </TouchableOpacity>
                 </View>
               </ListItem.Content>
             </ListItem>

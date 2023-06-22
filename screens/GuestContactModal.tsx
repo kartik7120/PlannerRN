@@ -19,7 +19,6 @@ export default function GuestContactModal() {
 
                 if (data.length > 0) {
                     const contact = data[0];
-                    console.log(contact);
                     setcontacts(data);
                 }
             }

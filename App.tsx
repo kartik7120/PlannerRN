@@ -17,6 +17,10 @@ import Events from './screens/Events';
 import Schedule from './screens/Schedule';
 import BudgetModal from './screens/BudgetModal';
 import GuestModal from './screens/GuestModal';
+import GuestContactModal from './screens/GuestContactModal';
+import BudgetItemModal from './screens/BudgetItemModal';
+import PaymentModal from './screens/PaymentModal';
+import CheckListScreen from './screens/CheckListScreen';
 
 export type RootStack = {
   Home: undefined;
@@ -30,6 +34,37 @@ export type RootStack = {
   Schedule: undefined;
   BudgetModal: undefined;
   GuestModal: undefined;
+  GuestContactModal: undefined;
+  BudgetItemModal: {
+    title: string;
+    id: string;
+    category: string;
+    name: string;
+    amount: string;
+    paid: string;
+    pending: string;
+    note: string;
+  };
+  PaymentModal: {
+    id: string;
+    paymentSubmit: boolean;
+    paymentId: string;
+    name?: string;
+    note?: string;
+    amount?: string;
+    paidDate?: string;
+    paid?: string;
+    category?: string;
+    pending?: string;
+  };
+  CheckListModal: {
+    name?: string;
+    note?: string;
+    category?: string;
+    date?: string;
+    completed?: boolean;
+    id?: string;
+  }
 }
 
 const Stack = createStackNavigator<RootStack>();
@@ -57,7 +92,7 @@ export default function App() {
     <ClerkProvider tokenCache={tokenCache} publishableKey={process.env.CLERK_PUBLISHABLE_KEY}>
       <NavigationContainer>
         <SafeAreaProvider>
-          <Stack.Navigator initialRouteName='Home'>
+          <Stack.Navigator initialRouteName='StartNew'>
             <Stack.Screen name="Home" component={TabNavigator} options={{
               headerShown: false
             }} />
@@ -92,6 +127,21 @@ export default function App() {
             <Stack.Screen name="GuestModal" component={GuestModal} options={{
               presentation: "modal",
               title: "Add a new guest"
+            }} />
+            <Stack.Screen name='GuestContactModal' component={GuestContactModal} options={{
+              presentation: "modal",
+              title: "Add a new guest"
+            }} />
+            <Stack.Screen name="BudgetItemModal" component={BudgetItemModal} options={{
+              presentation: "modal",
+            }} />
+            <Stack.Screen name="PaymentModal" component={PaymentModal} options={{
+              presentation: "modal",
+              title: "Add a new payment"
+            }} />
+            <Stack.Screen name="CheckListModal" component={CheckListScreen} options={{
+              presentation: "modal",
+              title: "Add a new task"
             }} />
           </Stack.Navigator>
         </SafeAreaProvider>

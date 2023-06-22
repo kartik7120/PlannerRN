@@ -14,11 +14,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, getDoc, onSnapshot } from "firebase/firestore"
 import { db } from '../firebase';
 import Tick from "../assets/tick.svg";
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStack } from '../App';
 
 export default function TabHomeScreen() {
 
   const [event, setEvent] = useState<any>();
   const [visible, setVisible] = useState(false);
+  const navigation = useNavigation<StackNavigationProp<RootStack, 'StartNew'>>();
 
   useEffect(() => {
     (async function lloadCurrentEvent() {
@@ -43,7 +47,7 @@ export default function TabHomeScreen() {
     <ScrollView>
       <View className='border overflow-hidden border-transparent rounded-lg m-2'>
         <Timer />
-        <View className='flex flex-row justify-between items-center w-full p-2 bg-white'>
+        {!visible && <View className='flex flex-row justify-between items-center w-full p-2 bg-white'>
           <View className=' flex flex-row gap-x-3'>
             <Image source={require("../assets/event_icon.jpg")}
               style={{ width: 50, height: 50, borderRadius: 50 / 2 }}
@@ -59,7 +63,7 @@ export default function TabHomeScreen() {
           <TouchableOpacity onPress={() => setVisible(!visible)}>
             <Feather name="menu" size={24} color="black" />
           </TouchableOpacity>
-        </View>
+        </View>}
         {visible && <>
           <View className='bg-white flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-2 items-center'>
@@ -94,7 +98,9 @@ export default function TabHomeScreen() {
               <Button title="JOIN" type='outline' />
             </View>
             <View className='basis-1/2'>
-              <Button type='solid' title="CREATE" />
+              <Button type='solid' title="CREATE" onPress={() => {
+                navigation.navigate("Events")
+              }} />
             </View>
           </View>
         </>

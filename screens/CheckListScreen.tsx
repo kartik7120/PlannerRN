@@ -1,18 +1,14 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Input } from '@rneui/themed';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { CompositeScreenProps, useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { RootStack } from '../App';
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { RootTab } from './TabNavigator';
 import DropDownPicker from 'react-native-dropdown-picker';
-
 
 export enum Category {
   Attire = 'Attire',
@@ -34,6 +30,9 @@ interface Form {
   date: string;
   completed: "Completed" | "Pending";
 }
+
+type RouteProps = RouteProp<RootStack, "CheckListModal">;
+
 export default function CheckListScreen() {
 
   const { control, handleSubmit, setValue, formState: { errors } } = useForm<Form>({
@@ -55,14 +54,24 @@ export default function CheckListScreen() {
   const [value, setDropDownValue] = useState(Category.Unassigned);
 
   const navigation = useNavigation() as any;
+  const route = useRoute<RouteProps>();
+
+  useEffect(() => {
+    if (route.params && route.params.edit) {
+      setValue('name', route.params.name || "");
+      setValue('note', route.params.note || "");
+      setValue('category', route.params.category as Category || Category.Unassigned);
+      setValue('date', route.params.date || "");
+      setValue('completed', route.params.completed as any || "Pending");
+    }
+  }, [route.params])
 
   const onSubmit = async (data: Form) => {
-    setValue('category', value);
     try {
       const eventId = await AsyncStorage.getItem('currentEventId');
       if (!eventId) throw new Error('No event id found');
       const colRef = collection(db, 'events', eventId, 'checklist');
-      await addDoc(colRef, data);
+      await addDoc(colRef, { ...data, category: value });
       navigation.navigate("Home", {
         screen: "Checklist"
       })
@@ -91,7 +100,26 @@ export default function CheckListScreen() {
     name: 'completed',
   })
 
-  console.log(`value of completed : ${completed}`);
+  const onEdit = async (data: Form) => {
+    try {
+      const eventId = await AsyncStorage.getItem('currentEventId');
+      if (!eventId) throw new Error('No event id found');
+      if (route.params === undefined || route.params.id === undefined) throw new Error('No id found');
+      const docRef = doc(db, 'events', eventId, 'checklist', route.params.id);
+      await updateDoc(docRef, {
+        name: data.name,
+        note: data.note,
+        category: value,
+        date: data.date,
+        completed: data.completed,
+      });
+      navigation.navigate("Home", {
+        screen: "Checklist"
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <View className='flex flex-col gap-y-3 m-2 h-full'>
@@ -163,7 +191,10 @@ export default function CheckListScreen() {
           backgroundColor: completed === 'Pending' ? "orange" : 'white',
         }}>Pending</Text>
       </View>
-      <Button title='Submit' onPress={handleSubmit(onSubmit)} />
+      {route.params && route.params.edit
+        ?
+        <Button title="Edit" onPress={handleSubmit(onEdit)} />
+        : <Button title='Submit' onPress={handleSubmit(onSubmit)} />}
     </View>
   )
 }

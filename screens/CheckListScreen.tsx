@@ -63,6 +63,9 @@ export default function CheckListScreen() {
       setValue('category', route.params.category as Category || Category.Unassigned);
       setValue('date', route.params.date || "");
       setValue('completed', route.params.completed as any || "Pending");
+      navigation.setOptions({
+        headerTitle: 'Edit task',
+      })
     }
   }, [route.params])
 

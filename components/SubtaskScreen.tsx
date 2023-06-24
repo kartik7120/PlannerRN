@@ -1,8 +1,8 @@
 import { View, Text } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useForm, Controller, useWatch } from 'react-hook-form'
 import { Button, Input } from '@rneui/themed';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '../firebase';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -36,11 +36,34 @@ export default function SubtaskScreen() {
         name: 'completed',
     })
 
+    useEffect(() => {
+        if (route.params && route.params.edit) {
+            setValue('name', route.params.name);
+            setValue('note', route.params.note);
+            setValue('completed', route.params.completed);
+        }
+    }, [route.params])
+
     const onSubmit = async (data: Form) => {
         try {
             const eventId = await AsyncStorage.getItem('currentEventId');
             if (!eventId) throw new Error('No event id found');
             await addDoc(collection(db, 'events', eventId, "checklist", route.params.taskId, "subtask"), {
+                name: data.name,
+                note: data.note,
+                completed: data.completed,
+            })
+            navigation.goBack();
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const onEdit = async (data: Form) => {
+        try {
+            const eventId = await AsyncStorage.getItem('currentEventId');
+            if (!eventId) throw new Error('No event id found');
+            await updateDoc(doc(db, 'events', eventId, "checklist", route.params.id, "subtask", route.params.taskId), {
                 name: data.name,
                 note: data.note,
                 completed: data.completed,
@@ -84,7 +107,8 @@ export default function SubtaskScreen() {
                 }}>Pending</Text>
             </View>
             <View className='mt-3'>
-                <Button title="ADD" onPress={handleSubmit(onSubmit)} />
+                {route.params.edit ? <Button title="EDIT" onPress={handleSubmit(onEdit)} />
+                    : <Button title="ADD" onPress={handleSubmit(onSubmit)} />}
             </View>
         </View>
     )

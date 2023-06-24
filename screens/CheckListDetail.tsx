@@ -115,10 +115,11 @@ export default function CheckListDetail() {
               {subtasks && subtasks?.map((subtask) => (
                 <ListItem bottomDivider key={subtask.id}>
                   <ListItem.CheckBox checked={subtask.completed} />
-                  <View className='flex flex-row justify-between items-center w-full' key={subtask.id}>
+                  <View className='flex flex-col justify-between w-full' key={subtask.id}>
                     <Text className='text-sm' style={{
                       textDecorationLine: subtask.completed ? 'line-through' : 'none',
                     }}>{subtask.name}</Text>
+                    <Text className='text-sm text-gray-500'>{subtask.note}</Text>
                   </View>
                 </ListItem>
               ))}

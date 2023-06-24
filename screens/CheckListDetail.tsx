@@ -8,7 +8,7 @@ import { Divider, Image, ListItem } from '@rneui/themed';
 import { FAB } from '@rneui/themed';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 type NavProps = StackNavigationProp<RootStack, "CheckListDetail">;
@@ -47,6 +47,20 @@ export default function CheckListDetail() {
     }
     getSubtasks();
   }, [])
+
+  const handleCheckBoxClick = async (id: string, value: string) => {
+    try {
+      const eventId = await AsyncStorage.getItem('currentEventId');
+      if (!eventId) throw new Error('No event id found');
+      if (!route.params || !route.params.id) throw new Error('No task id found');
+      const docRef = doc(db, 'events', eventId, 'checklist', route.params.id, 'subtask', id);
+      await updateDoc(docRef, {
+        completed: value === "Completed" ? "Pending" : "Completed"
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <View>
@@ -114,10 +128,10 @@ export default function CheckListDetail() {
             <View className='w-full'>
               {subtasks && subtasks?.map((subtask) => (
                 <ListItem bottomDivider key={subtask.id}>
-                  <ListItem.CheckBox checked={subtask.completed} />
+                  <ListItem.CheckBox checked={subtask.completed === "Completed" ? true : false} onPress={(e) => handleCheckBoxClick(subtask.id, subtask.completed)} />
                   <View className='flex flex-col justify-between w-full' key={subtask.id}>
                     <Text className='text-sm' style={{
-                      textDecorationLine: subtask.completed ? 'line-through' : 'none',
+                      textDecorationLine: subtask.completed === "Completed" ? 'line-through' : 'none',
                     }}>{subtask.name}</Text>
                     <Text className='text-sm text-gray-500'>{subtask.note}</Text>
                   </View>

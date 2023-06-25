@@ -228,7 +228,9 @@ export default function TabCheckListScreen() {
                           <Text> {returnCategoryIcon(item.category)}</Text>
                           <Text className='text-md text-gray-500'>{item.category}</Text>
                         </View>
-                        <Text className='text-orange-500'>Date</Text>
+                        <Text className='text-orange-500'>{
+                          new Date(item.date.seconds * 1000).toDateString()
+                        }</Text>
                       </View>
                     </TouchableOpacity>
                   </View>

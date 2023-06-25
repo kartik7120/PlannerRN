@@ -230,7 +230,7 @@ export default function TabCheckListScreen() {
                         </View>
                         <Text className='text-orange-500'>{
                           new Date(item.date.seconds * 1000).toDateString()
-                        }</Text>
+                        } {new Date().getDate() > new Date(item.date.seconds * 1000).getDate() ? "(Overdue)" : ""}</Text>
                       </View>
                     </TouchableOpacity>
                   </View>

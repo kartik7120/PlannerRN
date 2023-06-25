@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { collection, doc, getDoc, getDocs, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -26,27 +26,27 @@ const TopTab = createMaterialTopTabNavigator();
 function returnCategoryIcon(category: string) {
   switch (category) {
     case Category.Attire:
-      return <AntDesign name="skin" size={22} color="gray" />;
+      return <AntDesign name="skin" size={20} color="gray" />;
     case Category.Health:
-      return <AntDesign name="medicinebox" size={22} color="gray" />;
+      return <AntDesign name="medicinebox" size={20} color="gray" />;
     case Category.Music:
-      return <AntDesign name="sound" size={22} color="gray" />;
+      return <AntDesign name="sound" size={20} color="gray" />;
     case Category.Flower:
-      return <AntDesign name="enviromento" size={22} color="gray" />;
+      return <AntDesign name="enviromento" size={20} color="gray" />;
     case Category.Photo:
-      return <AntDesign name="camera" size={22} color="gray" />;
+      return <AntDesign name="camera" size={20} color="gray" />;
     case Category.Accessories:
-      return <AntDesign name="wallet" size={22} color="gray" />;
+      return <AntDesign name="wallet" size={20} color="gray" />;
     case Category.Reception:
-      return <AntDesign name="home" size={22} color="gray" />;
+      return <AntDesign name="home" size={20} color="gray" />;
     case Category.Transpotation:
-      return <AntDesign name="car" size={22} color="gray" />;
+      return <AntDesign name="car" size={20} color="gray" />;
     case Category.Accomodation:
-      return <AntDesign name="home" size={22} color="gray" />;
+      return <AntDesign name="home" size={20} color="gray" />;
     case Category.Unassigned:
-      return <AntDesign name="questioncircleo" size={22} color="gray" />;
+      return <AntDesign name="questioncircleo" size={20} color="gray" />;
     default:
-      return <AntDesign name="questioncircleo" size={22} color="gray" />;
+      return <AntDesign name="questioncircleo" size={20} color="gray" />;
   }
 }
 
@@ -55,6 +55,8 @@ export default function TabCheckListScreen() {
 
   const [event, setEvent] = React.useState<any[] | null>(null);
   const navigation = useNavigation<NavTypes>();
+  const [isLongPress, setIsLongPress] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<any[] | null>(null);
 
   useEffect(() => {
     async function getCheckList() {

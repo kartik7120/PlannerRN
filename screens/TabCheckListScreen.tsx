@@ -182,77 +182,79 @@ export default function TabCheckListScreen() {
   }
 
   return (
-    <ScrollView className='h-full'>
-      {event && event?.length > 0 ? (
-        <View className='flex flex-col gap-y-2 m-2'>
-          {event.map((item, index) => (
-            <ListItem key={item.id} bottomDivider style={{
-              backgroundColor: selectedItems && selectedItems.includes(item) ? backgroundStyles.backgroundColor : 'white',
-              opacity: selectedItems && selectedItems.includes(item) ? backgroundStyles.opacity : 1,
-            }}>
-              <ListItem.CheckBox checked={item.completed === "Completed" ? true : false} onPress={() => {
-                updateCheckList(item.id, item.completed === "Completed" ? "Pending" : "Completed")
-              }} />
-              <ListItem.Content style={{
-                width: "100%",
-                borderRadius: 10,
+    <>
+      <ScrollView className='h-full'>
+        {event && event?.length > 0 ? (
+          <View className='flex flex-col gap-y-2 m-2'>
+            {event.map((item, index) => (
+              <ListItem key={item.id} bottomDivider style={{
+                backgroundColor: selectedItems && selectedItems.includes(item) ? backgroundStyles.backgroundColor : 'white',
+                opacity: selectedItems && selectedItems.includes(item) ? backgroundStyles.opacity : 1,
               }}>
-                <View key={item.id} className='bg-white rounded-lg overflow-hidden w-full pl-2 pr-2 pt-1 pb-1 flex flex-col gap-y-2'>
-                  <TouchableOpacity onLongPress={() => handleLongPress(item)} onPress={() => {
-                    if (isLongPressed) {
-                      if (selectedItems === null) {
-                        return setSelectedItems((items) => {
-                          return [item];
-                        })
-                      } else if (selectedItems.includes(item)) {
-                        return setSelectedItems((todos) => {
-                          return todos!.filter((todo) => todo !== item);
-                        })
-                      } else {
-                        return setSelectedItems((items) => {
-                          return [...items!, item];
-                        })
+                <ListItem.CheckBox checked={item.completed === "Completed" ? true : false} onPress={() => {
+                  updateCheckList(item.id, item.completed === "Completed" ? "Pending" : "Completed")
+                }} />
+                <ListItem.Content style={{
+                  width: "100%",
+                  borderRadius: 10,
+                }}>
+                  <View key={item.id} className='bg-white rounded-lg overflow-hidden w-full pl-2 pr-2 pt-1 pb-1 flex flex-col gap-y-2'>
+                    <TouchableOpacity onLongPress={() => handleLongPress(item)} onPress={() => {
+                      if (isLongPressed) {
+                        if (selectedItems === null) {
+                          return setSelectedItems((items) => {
+                            return [item];
+                          })
+                        } else if (selectedItems.includes(item)) {
+                          return setSelectedItems((todos) => {
+                            return todos!.filter((todo) => todo !== item);
+                          })
+                        } else {
+                          return setSelectedItems((items) => {
+                            return [...items!, item];
+                          })
+                        }
                       }
-                    }
-                    navigation.navigate('CheckListDetail', {
-                      name: item.name,
-                      note: item.note,
-                      category: item.category,
-                      date: item.date,
-                      completed: item.completed,
-                      id: item.id,
-                    })
-                  }}>
-                    <Text className='text-lg '>{item.name}</Text>
-                    <View className='flex flex-row justify-between items-center'>
-                      <View className='flex flex-row gap-x-1'>
-                        <Text> {returnCategoryIcon(item.category)}</Text>
-                        <Text className='text-md text-gray-500'>{item.category}</Text>
+                      navigation.navigate('CheckListDetail', {
+                        name: item.name,
+                        note: item.note,
+                        category: item.category,
+                        date: item.date,
+                        completed: item.completed,
+                        id: item.id,
+                      })
+                    }}>
+                      <Text className='text-lg '>{item.name}</Text>
+                      <View className='flex flex-row justify-between items-center'>
+                        <View className='flex flex-row gap-x-1'>
+                          <Text> {returnCategoryIcon(item.category)}</Text>
+                          <Text className='text-md text-gray-500'>{item.category}</Text>
+                        </View>
+                        <Text className='text-orange-500'>Date</Text>
                       </View>
-                      <Text className='text-orange-500'>Date</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </ListItem.Content>
-            </ListItem>
-          ))}
-        </View>
-      ) : (
-        <View className='flex flex-col gap-y-1 items-center justify-center'>
-          <Image source={require("../assets/not_found.png")} style={{
-            width: 80,
-            height: 80,
-            resizeMode: 'contain',
-          }} />
-          <Text className='text-center text-xl font-bold'>There are no tasks</Text>
-          <Text className='text-center text-lg text-gray-500 font-bold'>Click + to add a new item</Text>
-        </View>
-      )}
+                    </TouchableOpacity>
+                  </View>
+                </ListItem.Content>
+              </ListItem>
+            ))}
+          </View>
+        ) : (
+          <View className='flex flex-col gap-y-1 items-center justify-center'>
+            <Image source={require("../assets/not_found.png")} style={{
+              width: 80,
+              height: 80,
+              resizeMode: 'contain',
+            }} />
+            <Text className='text-center text-xl font-bold'>There are no tasks</Text>
+            <Text className='text-center text-lg text-gray-500 font-bold'>Click + to add a new item</Text>
+          </View>
+        )}
+      </ScrollView>
       <FAB icon={<AntDesign name="plus" size={24} color="white" />} placement='right' onPress={() => {
         navigation.navigate('CheckListModal', {
 
         })
       }} />
-    </ScrollView>
+    </>
   )
 }

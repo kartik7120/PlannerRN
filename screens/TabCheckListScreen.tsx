@@ -3,8 +3,6 @@ import React, { useEffect, useLayoutEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { collection, doc, getDoc, getDocs, onSnapshot, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import CheckListScreen from './CheckListScreen';
 import { Divider, FAB, Image, ListItem } from '@rneui/themed';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';

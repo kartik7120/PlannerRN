@@ -81,7 +81,6 @@ export default function CheckListScreen() {
     } catch (error) {
       console.log(error);
     }
-    console.log(data);
   }
 
   const showDatePicker = () => {

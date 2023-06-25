@@ -8,7 +8,7 @@ import { Button, Divider, Image, ListItem } from '@rneui/themed';
 import { FAB } from '@rneui/themed';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { collection, doc, onSnapshot, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Feather } from '@expo/vector-icons';
 
@@ -61,6 +61,24 @@ export default function CheckListDetail() {
         return;
       }
       e.preventDefault();
+      setIsLongPressed(false);
+      setSelected([]);
+    })
+  }, [isLongPressed, navigation])
+
+  const handleDelete = async () => {
+    try {
+      const eventId = await AsyncStorage.getItem('currentEventId');
+      if (!eventId) throw new Error('No event id found');
+      if (!route.params || !route.params.id) throw new Error('No task id found');
+      if (!selectedItems) throw new Error('No selected items found');
+      const batch = writeBatch(db);
+      selectedItems.forEach((item) => {
+        const docRef = doc(db, 'events', eventId, 'checklist', route.params.id!, 'subtask', item.id);
+        batch.delete(docRef);
+      })
+      await batch.commit();
+      setIsLongPressed(false);
       navigation.setOptions({
         headerStyle: {
 
@@ -68,20 +86,30 @@ export default function CheckListDetail() {
         headerRight: () => (<></>),
         headerTitle: () => (<Text className='text-xl'>{route.params.name}</Text>)
       })
-      setIsLongPressed(false);
       setSelected([]);
-    })
-  }, [isLongPressed, navigation])
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   useLayoutEffect(() => {
-    if (!isLongPressed) return;
+    if (!isLongPressed) {
+      navigation.setOptions({
+        headerStyle: {
+
+        },
+        headerRight: () => (<></>),
+        headerTitle: () => (<Text className='text-xl'>{route.params.name}</Text>)
+      })
+      return;
+    }
     navigation.setOptions({
       headerRight: () => (
         <View className='flex flex-row w-1/3 justify-between items-center'>
           <TouchableOpacity onPress={handleEditPress}>
             <Feather name="edit-2" size={24} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleDelete}>
             <AntDesign name="delete" size={24} color="black" />
           </TouchableOpacity>
         </View>

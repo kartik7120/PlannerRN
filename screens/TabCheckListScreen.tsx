@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, doc, getDoc, getDocs, onSnapshot, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, onSnapshot, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import CheckListScreen from './CheckListScreen';
@@ -11,6 +11,9 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStack } from '../App';
 import { Category } from "./CheckListScreen";
+import { Feather } from '@expo/vector-icons';
+import { Octicons } from '@expo/vector-icons';
+
 type TopTabCheckListTabs<T> = {
   [key in keyof T]: T[key]
 };
@@ -20,8 +23,6 @@ type ParamsForTopTab = {
 }
 
 type NavTypes = StackNavigationProp<RootStack, 'CheckListModal'>;
-
-const TopTab = createMaterialTopTabNavigator();
 
 function returnCategoryIcon(category: string) {
   switch (category) {
@@ -50,13 +51,16 @@ function returnCategoryIcon(category: string) {
   }
 }
 
-
 export default function TabCheckListScreen() {
 
   const [event, setEvent] = React.useState<any[] | null>(null);
   const navigation = useNavigation<NavTypes>();
-  const [isLongPress, setIsLongPress] = useState(false);
+  const [isLongPressed, setIsLongPressed] = React.useState(false);
   const [selectedItems, setSelectedItems] = useState<any[] | null>(null);
+  const [backgroundStyles, setBackgroundStyles] = React.useState({
+    backgroundColor: "orange",
+    opacity: 0.5
+  });
 
   useEffect(() => {
     async function getCheckList() {
@@ -77,6 +81,80 @@ export default function TabCheckListScreen() {
     getCheckList();
   }, [])
 
+  useLayoutEffect(() => {
+    if (!isLongPressed) {
+      navigation.setOptions({
+        headerStyle: {
+
+        },
+        headerRight: () => (<></>),
+        headerLeft: () => (<Octicons name="checklist" size={24} color="black" />),
+        headerTitle: () => (<Text className='text-black text-lg'>Checklist</Text>),
+      })
+      return;
+    }
+    navigation.setOptions({
+      headerRight: () => (
+        <View className='flex flex-row w-1/3 justify-between items-center'>
+          <TouchableOpacity onPress={handleEditPress}>
+            <Feather name="edit-2" size={24} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleDelete}>
+            <AntDesign name="delete" size={24} color="black" />
+          </TouchableOpacity>
+        </View>
+      ),
+      headerRightContainerStyle: {
+        marginRight: 10,
+      },
+      headerStyle: {
+        backgroundColor: 'orange',
+      },
+      headerLeft: () => (
+        <AntDesign name="close" size={24} color="black" onPress={() => {
+          setIsLongPressed(false);
+          setSelectedItems(null);
+        }} />
+      ),
+      headerTitle: () => (<Text className='text-black text-lg'>{selectedItems && selectedItems.length} Selected</Text>)
+    })
+  }, [selectedItems, navigation, isLongPressed])
+
+  async function handleEditPress() {
+    if (!selectedItems) return;
+    selectedItems.forEach(item => {
+      navigation.push("CheckListModal", {
+        name: item.name,
+        note: item.note,
+        category: item.category,
+        date: item.date,
+        completed: item.completed,
+        id: item.id,
+        edit: true,
+      })
+    })
+    setIsLongPressed(false);
+    setSelectedItems(null);
+  }
+
+  async function handleDelete() {
+    if (!selectedItems) return;
+    try {
+      const eventId = await AsyncStorage.getItem('currentEventId');
+      if (!eventId) throw new Error('No event id found');
+      const batch = writeBatch(db);
+      selectedItems.forEach(item => {
+        const docRef = doc(db, 'events', eventId, "checklist", item.id);
+        batch.delete(docRef);
+      })
+      await batch.commit();
+      setSelectedItems(null);
+      setIsLongPressed(false);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async function updateCheckList(id: string, completed: string) {
     try {
       const eventId = await AsyncStorage.getItem('currentEventId');
@@ -90,12 +168,28 @@ export default function TabCheckListScreen() {
     }
   }
 
+  const handleLongPress = (firstSubtask: any) => {
+    setIsLongPressed(true);
+
+    setBackgroundStyles({
+      backgroundColor: "orange",
+      opacity: 0.5
+    })
+
+    setSelectedItems((items) => {
+      return [firstSubtask];
+    })
+  }
+
   return (
     <ScrollView className='h-full'>
       {event && event?.length > 0 ? (
         <View className='flex flex-col gap-y-2 m-2'>
           {event.map((item, index) => (
-            <ListItem key={item.id} bottomDivider>
+            <ListItem key={item.id} bottomDivider style={{
+              backgroundColor: selectedItems && selectedItems.includes(item) ? backgroundStyles.backgroundColor : 'white',
+              opacity: selectedItems && selectedItems.includes(item) ? backgroundStyles.opacity : 1,
+            }}>
               <ListItem.CheckBox checked={item.completed === "Completed" ? true : false} onPress={() => {
                 updateCheckList(item.id, item.completed === "Completed" ? "Pending" : "Completed")
               }} />
@@ -104,7 +198,22 @@ export default function TabCheckListScreen() {
                 borderRadius: 10,
               }}>
                 <View key={item.id} className='bg-white rounded-lg overflow-hidden w-full pl-2 pr-2 pt-1 pb-1 flex flex-col gap-y-2'>
-                  <TouchableOpacity onPress={() => {
+                  <TouchableOpacity onLongPress={() => handleLongPress(item)} onPress={() => {
+                    if (isLongPressed) {
+                      if (selectedItems === null) {
+                        return setSelectedItems((items) => {
+                          return [item];
+                        })
+                      } else if (selectedItems.includes(item)) {
+                        return setSelectedItems((todos) => {
+                          return todos!.filter((todo) => todo !== item);
+                        })
+                      } else {
+                        return setSelectedItems((items) => {
+                          return [...items!, item];
+                        })
+                      }
+                    }
                     navigation.navigate('CheckListDetail', {
                       name: item.name,
                       note: item.note,

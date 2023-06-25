@@ -21,6 +21,8 @@ import GuestContactModal from './screens/GuestContactModal';
 import BudgetItemModal from './screens/BudgetItemModal';
 import PaymentModal from './screens/PaymentModal';
 import CheckListScreen from './screens/CheckListScreen';
+import CheckListDetail from './screens/CheckListDetail';
+import SubtaskScreen from './components/SubtaskScreen';
 
 export type RootStack = {
   Home: undefined;
@@ -64,6 +66,23 @@ export type RootStack = {
     date?: string;
     completed?: boolean;
     id?: string;
+    edit?: boolean;
+  },
+  CheckListDetail: {
+    name?: string;
+    note?: string;
+    category?: string;
+    date?: string;
+    completed?: boolean;
+    id?: string;
+  },
+  SubTask: {
+    name?: string;
+    note?: string;
+    completed?: boolean;
+    taskId?: string;
+    id?: string;
+    edit?: boolean;
   }
 }
 
@@ -142,6 +161,14 @@ export default function App() {
             <Stack.Screen name="CheckListModal" component={CheckListScreen} options={{
               presentation: "modal",
               title: "Add a new task"
+            }} />
+            <Stack.Screen name="CheckListDetail" component={CheckListDetail} options={{
+              presentation: "modal",
+              title: "Task Details"
+            }} />
+            <Stack.Screen name="SubTask" component={SubtaskScreen} options={{
+              presentation: "modal",
+              title: "Add a new subtask"
             }} />
           </Stack.Navigator>
         </SafeAreaProvider>

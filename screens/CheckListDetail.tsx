@@ -1,15 +1,16 @@
-import { View, Text } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import React, { useEffect, useLayoutEffect } from 'react'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RootStack } from '../App'
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { AntDesign } from '@expo/vector-icons';
-import { Divider, Image, ListItem } from '@rneui/themed';
+import { Button, Divider, Image, ListItem } from '@rneui/themed';
 import { FAB } from '@rneui/themed';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { Feather } from '@expo/vector-icons';
 
 type NavProps = StackNavigationProp<RootStack, "CheckListDetail">;
 type RouteProps = RouteProp<RootStack, "CheckListDetail">;
@@ -19,6 +20,12 @@ export default function CheckListDetail() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavProps>();
   const [subtasks, setSubtasks] = React.useState<any[] | null>(null);
+  const [selectedItems, setSelected] = React.useState<any[] | null>(null);
+  const [isLongPressed, setIsLongPressed] = React.useState(false);
+  const [backgroundStyles, setBackgroundStyles] = React.useState({
+    backgroundColor: "orange",
+    opacity: 0.5
+  });
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -48,6 +55,47 @@ export default function CheckListDetail() {
     getSubtasks();
   }, [])
 
+  useEffect(() => {
+    navigation.addListener("beforeRemove", (e) => {
+      if (!isLongPressed) {
+        return;
+      }
+      e.preventDefault();
+      navigation.setOptions({
+        headerStyle: {
+
+        },
+        headerRight: () => (<></>),
+        headerTitle: () => (<Text className='text-xl'>{route.params.name}</Text>)
+      })
+      setIsLongPressed(false);
+      setSelected([]);
+    })
+  }, [isLongPressed, navigation])
+
+  useLayoutEffect(() => {
+    if (!isLongPressed) return;
+    navigation.setOptions({
+      headerRight: () => (
+        <View className='flex flex-row w-1/3 justify-between items-center'>
+          <TouchableOpacity onPress={handleEditPress}>
+            <Feather name="edit-2" size={24} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <AntDesign name="delete" size={24} color="black" />
+          </TouchableOpacity>
+        </View>
+      ),
+      headerRightContainerStyle: {
+        marginRight: 10,
+      },
+      headerStyle: {
+        backgroundColor: 'orange',
+      },
+      headerTitle: () => (<Text className='text-black text-lg'>{selectedItems && selectedItems.length} Selected</Text>)
+    })
+  }, [selectedItems, navigation, isLongPressed])
+
   const handleCheckBoxClick = async (id: string, value: string) => {
     try {
       const eventId = await AsyncStorage.getItem('currentEventId');
@@ -60,6 +108,44 @@ export default function CheckListDetail() {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  const handleEditPress = () => {
+    if (selectedItems !== null && selectedItems.length > 0) {
+      setIsLongPressed(false);
+      navigation.setOptions({
+        headerStyle: {
+
+        },
+        headerRight: () => (<></>),
+        headerTitle: () => (<Text className='text-xl'>{route.params.name}</Text>)
+      })
+      selectedItems.map((item) => {
+        navigation.push("SubTask", {
+          id: route.params && route.params.id,
+          taskId: item.id,
+          name: item.name,
+          note: item.note,
+          completed: item.completed,
+          edit: true,
+        })
+      })
+      setSelected([]);
+    }
+  }
+
+  const handleLongPress = async (firstSubtask: any) => {
+    setIsLongPressed(true);
+
+    setBackgroundStyles({
+      backgroundColor: "orange",
+      opacity: 0.5
+    })
+
+    setSelected((items) => {
+      return [firstSubtask];
+    })
+
   }
 
   return (
@@ -127,14 +213,43 @@ export default function CheckListDetail() {
           ) : (
             <View className='w-full'>
               {subtasks && subtasks?.map((subtask) => (
-                <ListItem bottomDivider key={subtask.id}>
+                <ListItem bottomDivider key={subtask.id} style={{
+                  backgroundColor: selectedItems && selectedItems.includes(subtask) ? backgroundStyles.backgroundColor : 'white',
+                  opacity: selectedItems && selectedItems.includes(subtask) ? backgroundStyles.opacity : 1,
+                }}>
                   <ListItem.CheckBox checked={subtask.completed === "Completed" ? true : false} onPress={(e) => handleCheckBoxClick(subtask.id, subtask.completed)} />
-                  <View className='flex flex-col justify-between w-full' key={subtask.id}>
-                    <Text className='text-sm' style={{
-                      textDecorationLine: subtask.completed === "Completed" ? 'line-through' : 'none',
-                    }}>{subtask.name}</Text>
-                    <Text className='text-sm text-gray-500'>{subtask.note}</Text>
-                  </View>
+                  <TouchableOpacity onLongPress={() => handleLongPress(subtask)} onPress={() => {
+                    if (isLongPressed) {
+                      if (selectedItems === null) {
+                        return setSelected((items) => {
+                          return [subtask];
+                        })
+                      } else if (selectedItems.includes(subtask)) {
+                        return setSelected((items) => {
+                          return items!.filter((item) => item !== subtask);
+                        })
+                      } else {
+                        return setSelected((items) => {
+                          return [...items!, subtask];
+                        })
+                      }
+                    }
+                    navigation.navigate("SubTask", {
+                      id: route.params && route.params.id,
+                      taskId: subtask.id,
+                      name: subtask.name,
+                      note: subtask.note,
+                      completed: subtask.completed,
+                      edit: true,
+                    })
+                  }}>
+                    <View className='flex flex-col justify-between w-full' key={subtask.id}>
+                      <Text className='text-sm' style={{
+                        textDecorationLine: subtask.completed === "Completed" ? 'line-through' : 'none',
+                      }}>{subtask.name}</Text>
+                      <Text className='text-sm text-gray-500'>{subtask.note}</Text>
+                    </View>
+                  </TouchableOpacity>
                 </ListItem>
               ))}
             </View>

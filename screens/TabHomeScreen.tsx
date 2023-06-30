@@ -136,7 +136,9 @@ export default function TabHomeScreen() {
                 <Image source={require("../assets/budget.png")} style={{ width: 50, height: 50, resizeMode: "contain" }} />
                 <Text>Budget</Text>
               </TouchableOpacity>
-              <TouchableOpacity className='flex flex-col justify-center items-center max-w-fit gap-y-2'>
+              <TouchableOpacity onPress={() => {
+                navigation.navigate("Vendors")
+              }} className='flex flex-col justify-center items-center max-w-fit gap-y-2'>
                 <Image source={require("../assets/vendor.png")} style={{ width: 50, height: 50, resizeMode: "contain" }} />
                 <Text>Vendors</Text>
               </TouchableOpacity>

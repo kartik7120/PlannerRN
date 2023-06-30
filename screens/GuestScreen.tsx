@@ -23,7 +23,10 @@ export default function GuestScreen() {
                 }}>
                     <Text className='text-lg'>Add manually</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => {
+                    setvisible(false);
+                    navigation.navigate('GuestContactModal');
+                }}>
                     <Text className='text-lg'>Add from contacts</Text>
                 </TouchableOpacity>
             </Dialog>

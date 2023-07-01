@@ -50,9 +50,22 @@ export default function Vendors() {
             </Dialog>
             <View className='h-full'>
                 {vendors.length > 0 ? vendors.map((vendor, index) => (
-                    <ListItem bottomDivider key={vendor.id} topDivider>
+                    <ListItem bottomDivider key={vendor.id} topDivider >
                         <ListItem.Content>
-                            <TouchableOpacity className='w-full'>
+                            <TouchableOpacity onPress={() => {
+                        navigation.navigate("VendorsDetailModal", {
+                            id: vendor.id,
+                            name: vendor.name,
+                            note: vendor.note,
+                            category: vendor.category,
+                            phone: vendor.phone,
+                            email: vendor.email,
+                            website: vendor.website,
+                            address: vendor.address,
+                            amount: vendor.amount,
+                            status: vendor.status,
+                        })
+                    }}className='w-full'>
                                 <View className='flex flex-row justify-between items-center bg-white'>
                                     <View className='flex flex-row items-center gap-x-4'>
                                         {vendor.status === "Reserved" && <Image source={require("../assets/tick.svg")} style={{

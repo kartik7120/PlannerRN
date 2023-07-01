@@ -34,7 +34,7 @@ export default function VendorsFormModal() {
             website: '',
             address: '',
             amount: '',
-            status: '',
+            status: 'Pending',
         }
     });
 

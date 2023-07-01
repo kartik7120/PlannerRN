@@ -1,14 +1,20 @@
 import { View, Text } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form';
 import { Button, Input } from '@rneui/themed';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Category } from './CheckListScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RootStack } from '../App';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+type NavigationProps = StackNavigationProp<RootStack, 'VendorsDetailModal'>;
+type RProps = RouteProp<RootStack, "VendorsForm">;
+
 
 interface Form {
     name: string;
@@ -38,7 +44,10 @@ export default function VendorsFormModal() {
         }
     });
 
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProps>();
+    const route = useRoute<RProps>();
+
+
 
     const [items2, setItems2] = useState([
         { label: 'Attire & Accessories', value: 'Attire', },
@@ -54,7 +63,7 @@ export default function VendorsFormModal() {
     ])
 
     const [open2, setOpen2] = useState(false)
-    const [value2, setValue2] = useState(null);
+    const [value2, setValue2] = useState<any>(null);
 
     const [items, setItems] = useState([
         { label: 'Reserved', value: 'Reserved' },
@@ -62,7 +71,24 @@ export default function VendorsFormModal() {
         { label: 'Rejected', value: 'Rejected' }
     ]);
     const [open, setOpen] = useState(false);
-    const [value, setValue] = useState(null);
+    const [value, setValue] = useState<any>(null);
+
+    useEffect(() => {
+        if (route.params && route.params.edit) {
+            setFormValue("name", route.params.name || "");
+            setFormValue("note", route.params.note);
+            setFormValue("category", route.params.category as Category);
+            setFormValue("phone", route.params.phone || "");
+            setFormValue("email", route.params.email);
+            setFormValue("website", route.params.website);
+            setFormValue("address", route.params.address);
+            setFormValue("amount", route.params.amount || "");
+            setFormValue("status", route.params.status || "Pending");
+            if (route.params.category) setValue2(route.params.category);
+            if (route.params.status) setValue(route.params.status);
+        }
+    }, [route.params])
+
 
     const onSubmit = async (data: Form) => {
         setFormValue("category", value2);
@@ -72,6 +98,31 @@ export default function VendorsFormModal() {
             if (!eventId) return;
             const colRef = collection(db, 'events', eventId, 'vendors');
             await addDoc(colRef, data);
+            navigation.goBack();
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const onEdit = async (data: Form) => {
+        setFormValue("category", value2);
+        setFormValue("status", value === null ? "Reserved" : value);
+        try {
+            const eventId = await AsyncStorage.getItem('currentEventId');
+            if (!eventId) return;
+            if (!route.params.id) return;
+            const docRef = doc(db, 'events', eventId, 'vendors', route.params.id);
+            await updateDoc(docRef, {
+                name: data.name,
+                note: data.note,
+                category: data.category,
+                phone: data.phone,
+                email: data.email,
+                website: data.website,
+                address: data.address,
+                amount: data.amount,
+                status: data.status,
+            });
             navigation.goBack();
         } catch (error) {
             console.log(error);
@@ -109,13 +160,21 @@ export default function VendorsFormModal() {
                     <Input label='Amount' onBlur={onBlur} onChangeText={onChange} value={value} keyboardType='number-pad' />
                 )} rules={{ required: true }} />
                 <View className='z-50'>
-                    <DropDownPicker listMode="SCROLLVIEW" placeholder='Select status of vendor' open={open} setOpen={setOpen} setValue={setValue} value={value}
+                    <DropDownPicker listMode="SCROLLVIEW" placeholder='Select status of vendor'
+                        open={open} setOpen={setOpen} setValue={setValue} value={value}
                         setItems={setItems} items={items}
                     />
                 </View>
-                <View className='mt-5'>
-                    <Button title="ADD" onPress={handleSubmit(onSubmit)} />
-                </View>
+                {route.params && route.params.edit === true ? (
+                    <View className='mt-5'>
+                        <Button title="EDIT" onPress={handleSubmit(onEdit)} />
+                    </View>
+                )
+                    :
+                    <View className='mt-5'>
+                        <Button title="ADD" onPress={handleSubmit(onSubmit)} />
+                    </View>
+                }
             </View>
         </ScrollView>
     )

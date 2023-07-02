@@ -23,6 +23,8 @@ import PaymentModal from './screens/PaymentModal';
 import CheckListScreen from './screens/CheckListScreen';
 import CheckListDetail from './screens/CheckListDetail';
 import SubtaskScreen from './components/SubtaskScreen';
+import VendorsFormModal from './screens/VendorsFormModal';
+import VendorDetails from './screens/VendorDetails';
 
 export type RootStack = {
   Home: undefined;
@@ -46,6 +48,7 @@ export type RootStack = {
     paid: string;
     pending: string;
     note: string;
+    edit?: boolean;
   };
   PaymentModal: {
     id: string;
@@ -83,6 +86,31 @@ export type RootStack = {
     taskId?: string;
     id?: string;
     edit?: boolean;
+  },
+  VendorsForm: {
+    name?: string;
+    note?: string;
+    category?: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+    address?: string;
+    amount?: string;
+    status?: string;
+    id?: string;
+    edit?: boolean;
+  },
+  VendorsDetailModal: {
+    name?: string;
+    note?: string;
+    category?: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+    address?: string;
+    amount?: string;
+    status?: string;
+    id?: string;
   }
 }
 
@@ -111,7 +139,7 @@ export default function App() {
     <ClerkProvider tokenCache={tokenCache} publishableKey={process.env.CLERK_PUBLISHABLE_KEY}>
       <NavigationContainer>
         <SafeAreaProvider>
-          <Stack.Navigator initialRouteName='StartNew'>
+          <Stack.Navigator initialRouteName='Start'>
             <Stack.Screen name="Home" component={TabNavigator} options={{
               headerShown: false
             }} />
@@ -169,6 +197,14 @@ export default function App() {
             <Stack.Screen name="SubTask" component={SubtaskScreen} options={{
               presentation: "modal",
               title: "Add a new subtask"
+            }} />
+            <Stack.Screen name="VendorsForm" component={VendorsFormModal} options={{
+              presentation: "modal",
+              title: "Add a new vendor"
+            }} />
+            <Stack.Screen name="VendorsDetailModal" component={VendorDetails} options={{
+              presentation: "modal",
+              title: "Vendor Details"
             }} />
           </Stack.Navigator>
         </SafeAreaProvider>

@@ -7,10 +7,12 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp, } from '@react-navigation/stack';
 import { RootStack } from '../App';
 import { AntDesign } from '@expo/vector-icons';
-import { Divider, FAB } from '@rneui/themed';
+import { Divider, FAB, Image, LinearProgress } from '@rneui/themed';
 import { FontAwesome } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { ScrollView } from 'react-native';
 
 type NavigationProps = StackNavigationProp<RootStack, 'VendorsDetailModal'>;
 type RProps = RouteProp<RootStack, "VendorsDetailModal">;
@@ -36,7 +38,7 @@ export default function VendorDetails() {
     }, [])
 
     return (
-        <View>
+        <ScrollView>
             <View className='bg-white m-2 p-2 rounded-lg border border-transparent overflow-hidden'>
                 <View className='flex flex-row items-center gap-x-4 mb-2'>
                     <AntDesign name="infocirlceo" size={24} color="black" />
@@ -100,6 +102,47 @@ export default function VendorDetails() {
                     </View>
                 </View>
             </View>
-        </View>
+
+            <View className='bg-white m-2 p-2 rounded-lg border border-transparent overflow-hidden'>
+                <View className='flex flex-row items-center gap-x-4 mb-2'>
+                    <FontAwesome name="money" size={24} color="black" />
+                    <Text>BALANCE</Text>
+                </View>
+                <Divider width={1} />
+                <View className='flex flex-row justify-between items-center mt-2'>
+                    <View className='flex flex-col gap-y-4'>
+                        <Text>Amount</Text>
+                        <Text>Paid</Text>
+                        <Text>Pending</Text>
+                    </View>
+                    <View className='flex flex-col gap-y-4'>
+                        <Text>{vendorDetails && vendorDetails.amount || "0"}</Text>
+                        <Text>{vendorDetails && vendorDetails.paid || "0"}</Text>
+                        <Text>{vendorDetails && vendorDetails.pending || "0"}</Text>
+                    </View>
+                </View>
+                <LinearProgress value={vendorDetails && vendorDetails.paid / vendorDetails.amount || 0} />
+            </View>
+
+            <View className='bg-white m-2 p-2 rounded-lg border border-transparent overflow-hidden'>
+                <View className='flex flex-row items-center gap-x-4 mb-2'>
+                    <Ionicons name="wallet-outline" size={24} color="black" />
+                    <Text>PAYMENTS</Text>
+                </View>
+                <Divider width={1} />
+                <View className='flex flex-col items-center justify-center gap-y-2'>
+                    <Image source={require("../assets/not_found.png")} style={{
+                        width: 70,
+                        height: 70,
+                        alignSelf: 'center'
+                    }} />
+                    <Text className='text-center'>There are on payments</Text>
+                    <Text className='text-gray-400'>Click + to add a new item</Text>
+                </View>
+                <FAB color="orange" placement='right' icon={<AntDesign name="plus" size={24} color="white" />} onPress={() => {
+                    navigation.navigate("PaymentVendorForm");
+                }} />
+            </View>
+        </ScrollView>
     )
 }

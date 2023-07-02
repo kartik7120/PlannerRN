@@ -25,6 +25,7 @@ import CheckListDetail from './screens/CheckListDetail';
 import SubtaskScreen from './components/SubtaskScreen';
 import VendorsFormModal from './screens/VendorsFormModal';
 import VendorDetails from './screens/VendorDetails';
+import PaymentVendorForm from './screens/PaymentVendorForm';
 
 export type RootStack = {
   Home: undefined;
@@ -111,6 +112,16 @@ export type RootStack = {
     amount?: string;
     status?: string;
     id?: string;
+  },
+  PaymentVendorForm: {
+    name?: string;
+    note?: string;
+    amount?: string;
+    paidDate?: string;
+    paid?: boolean;
+    id: string;
+    edit?: boolean;
+    paymentId?: string;
   }
 }
 
@@ -205,6 +216,10 @@ export default function App() {
             <Stack.Screen name="VendorsDetailModal" component={VendorDetails} options={{
               presentation: "modal",
               title: "Vendor Details"
+            }} />
+            <Stack.Screen name="PaymentVendorForm" component={PaymentVendorForm} options={{
+              presentation: "modal",
+              title: "Add a new payment"
             }} />
           </Stack.Navigator>
         </SafeAreaProvider>

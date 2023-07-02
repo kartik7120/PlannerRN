@@ -22,7 +22,8 @@ export default function VendorDetails() {
     const [vendorDetails, setVendorDetails] = useState<any>(null);
     const navigation = useNavigation<NavigationProps>();
     const route = useRoute<RProps>();
-
+    const [unsubscribeFunc, setUnsubscribeFunc] = useState<any>(null);
+    
     useEffect(() => {
         async function getVendorDetail() {
             const eventId = await AsyncStorage.getItem('currentEventId');
@@ -30,11 +31,14 @@ export default function VendorDetails() {
             if (!route.params.id) return;
             const docRef = doc(db, "events", eventId, "vendors", route.params.id);
             const unsubscribe = onSnapshot(docRef, (doc) => {
-                setVendorDetails(doc.data());
+                setVendorDetails({ ...doc.data(), id: doc.id });
             })
-            return unsubscribe;
+            setUnsubscribeFunc(() => unsubscribe);
         }
         getVendorDetail();
+        return () => {
+            unsubscribeFunc && unsubscribeFunc();
+        }
     }, [])
 
     return (
@@ -140,7 +144,9 @@ export default function VendorDetails() {
                     <Text className='text-gray-400'>Click + to add a new item</Text>
                 </View>
                 <FAB color="orange" placement='right' icon={<AntDesign name="plus" size={24} color="white" />} onPress={() => {
-                    navigation.navigate("PaymentVendorForm");
+                    navigation.navigate("PaymentVendorForm", {
+                        id: vendorDetails.id,
+                    });
                 }} />
             </View>
         </ScrollView>

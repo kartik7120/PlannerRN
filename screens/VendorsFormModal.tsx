@@ -97,7 +97,7 @@ export default function VendorsFormModal() {
             const eventId = await AsyncStorage.getItem('currentEventId');
             if (!eventId) return;
             const colRef = collection(db, 'events', eventId, 'vendors');
-            await addDoc(colRef, data);
+            await addDoc(colRef, { ...data, category: data.category, status: data.status, paid: 0, pending: 0 });
             navigation.goBack();
         } catch (error) {
             console.log(error);

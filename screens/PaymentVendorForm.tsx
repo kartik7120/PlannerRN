@@ -37,7 +37,13 @@ export default function PaymentVendorForm() {
 
     const navigation = useNavigation<NavProps>();
     const route = useRoute<RProps>();
-
+    const [open, setOpen] = useState(false);
+    const [value, setDropDownValue] = useState(null);
+    const [items, setItems] = useState([
+        { label: 'Paid', value: true },
+        { label: 'Pending', value: false },
+      ]);
+    
     useEffect(() => {
         if (route.params && route.params.edit) {
             setValue('name', route.params.name || "");
@@ -96,7 +102,7 @@ export default function PaymentVendorForm() {
     }
 
     return (
-        <View >
+        <View className='h-full p-4'>
             <Controller control={control} render={({ field: { onChange, onBlur, value } }) => (
                 <Input
                     onBlur={onBlur}
@@ -122,15 +128,16 @@ export default function PaymentVendorForm() {
                     keyboardType='number-pad'
                 />
             )} name="amount" rules={{ required: true }} />
-            <Controller control={control} render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    placeholder="Paid Date"
-                />
-            )} name="paidDate" rules={{ required: true }} />
-            <Button title="Set Date" onPress={() => setDatePickerVisibility(true)} />
+
+            <View className='z-40'>
+                <DropDownPicker items={items} containerStyle={{ height: 40 }} value={value} open={open}
+                    setOpen={setOpen} setValue={setDropDownValue} setItems={setItems}/>
+            </View>
+
+            <Button title="Set Date" type='outline' style={{
+                marginBottom: 20
+            }} onPress={() => setDatePickerVisibility(true)} />
+
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
                 mode="date"

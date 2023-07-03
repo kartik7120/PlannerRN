@@ -38,12 +38,12 @@ export default function PaymentVendorForm() {
     const navigation = useNavigation<NavProps>();
     const route = useRoute<RProps>();
     const [open, setOpen] = useState(false);
-    const [value, setDropDownValue] = useState(null);
+    const [value, setDropDownValue] = useState(false);
     const [items, setItems] = useState([
         { label: 'Paid', value: true },
         { label: 'Pending', value: false },
-      ]);
-    
+    ]);
+
     useEffect(() => {
         if (route.params && route.params.edit) {
             setValue('name', route.params.name || "");
@@ -71,6 +71,7 @@ export default function PaymentVendorForm() {
     };
 
     const onsubmit = async (data: Form) => {
+        setValue('paid', value);
         try {
             const eventId = await AsyncStorage.getItem('currentEventId');
             if (!eventId) return;
@@ -131,7 +132,7 @@ export default function PaymentVendorForm() {
 
             <View className='z-40'>
                 <DropDownPicker items={items} containerStyle={{ height: 40 }} value={value} open={open}
-                    setOpen={setOpen} setValue={setDropDownValue} setItems={setItems}/>
+                    setOpen={setOpen} setValue={setDropDownValue} setItems={setItems} />
             </View>
 
             <Button title="Set Date" type='outline' style={{

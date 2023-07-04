@@ -91,6 +91,10 @@ export default function VendorDetails() {
             batch.delete(docRef2);
         })
         batch.commit();
+        await updateDoc(docRef, {
+            paidAmount: (vendorDetails.paid || 0) - paidAmount,
+            pendingAmount: (vendorDetails.pending || 0) - pendingAmount
+        })
         setIsLongPressed(false);
         setSelectedItems([]);
     }
@@ -142,22 +146,23 @@ export default function VendorDetails() {
             const eventId = await AsyncStorage.getItem('currentEventId');
             if (!eventId) return;
             if (!route.params.id) return;
+            const docRef2 = doc(db, "events", eventId, "vendors", route.params.id);
+            if (paid === false) {
+                await updateDoc(docRef2, {
+                    paidAmount: (vendorDetails.paidAmount || 0) + Number(amount),
+                    pendingAmount: (vendorDetails.pendingAmount || 0) - Number(amount)
+                })
+            } else {
+                await updateDoc(docRef2, {
+                    pendingAmount: Math.abs((vendorDetails.paidAmount || 0) - Number(amount)),
+                    paidAmount: (vendorDetails.pendingAmount || 0) + Number(amount)
+                })
+            }
             const docRef = doc(db, "events", eventId, "vendors", route.params.id, "payments", id);
             await updateDoc(docRef, {
                 paid: !paid
             })
-            const docRef2 = doc(db, "events", eventId, "vendors", route.params.id);
-            if (paid === false) {
-                await updateDoc(docRef2, {
-                    paid: (vendorDetails.paid || 0) + Number(amount),
-                    pending: Math.abs((vendorDetails.paid || 0) + Number(amount) - (vendorDetails.amount || 0))
-                })
-            } else {
-                await updateDoc(docRef2, {
-                    pending: Math.abs((vendorDetails.paid || 0) + Number(amount)),
-                    paid: (vendorDetails.paid || 0) - Number(amount)
-                })
-            }
+
         } catch (error) {
             console.log(error);
         }
@@ -289,7 +294,7 @@ export default function VendorDetails() {
                             }}>
                                 <ListItem.CheckBox checked={payment.paid} onPress={() => setPaid(payment.id, payment.paid, payment.amount)} />
                                 <ListItem.Content>
-                                    <TouchableOpacity  onLongPress={() => handleItemLongPress(payment)} onPress={() => {
+                                    <TouchableOpacity onLongPress={() => handleItemLongPress(payment)} onPress={() => {
                                         if (isLongPressed) {
                                             if (selectedItems === null) {
                                                 return setSelectedItems((items) => {

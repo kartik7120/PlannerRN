@@ -124,7 +124,11 @@ export default function TabHomeScreen() {
         <View>
           <View className='flex flex-col gap-y-4 mt-3'>
             <View className='flex flex-row items-center justify-evenly'>
-              <TouchableOpacity className='flex flex-col justify-center items-center max-w-fit gap-y-2'>
+              <TouchableOpacity className='flex flex-col justify-center items-center max-w-fit gap-y-2' onPress={() => {
+                navigation.navigate("Home",{
+                  screen: "Checklist"
+                })
+              }}>
                 <Image source={require("../assets/task_list.png")} style={{ width: 50, height: 50, resizeMode: "contain" }} />
                 <Text>Checklist</Text>
               </TouchableOpacity>

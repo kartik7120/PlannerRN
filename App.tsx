@@ -28,7 +28,9 @@ import VendorDetails from './screens/VendorDetails';
 import PaymentVendorForm from './screens/PaymentVendorForm';
 
 export type RootStack = {
-  Home: undefined;
+  Home: {
+    screen: string;
+  };
   Start: undefined;
   StartNew: undefined;
   Vendors: undefined;

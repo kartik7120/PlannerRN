@@ -95,6 +95,8 @@ export default function PaymentVendorForm() {
                 amount: data.amount,
                 paidDate: data.paidDate,
                 paid: data.paid,
+                paidAmount: data.paid ? data.amount : 0,
+                pendingAmount: data.paid ? 0 : data.amount,
             });
             navigation.goBack();
         } catch (error) {

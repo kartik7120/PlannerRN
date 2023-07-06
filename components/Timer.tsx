@@ -1,6 +1,9 @@
 import { View, Text } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 
 export default function Timer() {
 
@@ -11,9 +14,11 @@ export default function Timer() {
         secs: 0
     })
 
+    const [eventDetail, setEventDetail] = useState<any>(null);
+
     useEffect(() => {
-        let date1 = new Date();
-        date1.setDate(date1.getDate() + 7);
+        if(!eventDetail) return;
+        let date1 = new Date(eventDetail.time.seconds * 1000);
         const clearIternval = setInterval(() => {
             const date2 = new Date();
             const diffTime = Math.abs(date2.getTime() - date1.getTime());
@@ -34,6 +39,25 @@ export default function Timer() {
         return () => {
             clearInterval(clearIternval);
         }
+    }, [eventDetail])
+
+    useEffect(() => {
+        async function getEventDetail() {
+            try {
+                const eventId = await AsyncStorage.getItem('currentEventId');
+                if (!eventId) return;
+                const docRef = doc(db, "events", eventId);
+                onSnapshot(docRef, (doc) => {
+                    if (doc.exists()) {
+                        console.log(`event details : ${JSON.stringify(doc.data())}`)
+                        setEventDetail({ ...doc.data(), id: doc.id });
+                    }
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        getEventDetail();
     }, [])
 
     return (

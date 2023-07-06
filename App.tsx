@@ -26,6 +26,7 @@ import SubtaskScreen from './components/SubtaskScreen';
 import VendorsFormModal from './screens/VendorsFormModal';
 import VendorDetails from './screens/VendorDetails';
 import PaymentVendorForm from './screens/PaymentVendorForm';
+import ChangeNameModal from './screens/ChangeNameModal';
 
 export type RootStack = {
   Home: {
@@ -124,7 +125,8 @@ export type RootStack = {
     id: string;
     edit?: boolean;
     paymentId?: string;
-  }
+  },
+  ChainNameSettings: undefined;
 }
 
 const Stack = createStackNavigator<RootStack>();
@@ -222,6 +224,10 @@ export default function App() {
             <Stack.Screen name="PaymentVendorForm" component={PaymentVendorForm} options={{
               presentation: "modal",
               title: "Add a new payment"
+            }} />
+            <Stack.Screen name="ChainNameSettings" component={ChangeNameModal} options={{
+              presentation: "modal",
+              title: "User"
             }} />
           </Stack.Navigator>
         </SafeAreaProvider>

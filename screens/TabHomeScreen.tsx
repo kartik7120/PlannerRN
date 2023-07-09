@@ -11,12 +11,82 @@ import {
   PieChart,
 } from "react-native-chart-kit";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { doc, getDoc, onSnapshot } from "firebase/firestore"
+import { collection, doc, getDoc, getDocs, onSnapshot } from "firebase/firestore"
 import { db } from '../firebase';
 import Tick from "../assets/tick.svg";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStack } from '../App';
+import { useQuery } from '@tanstack/react-query'
+
+const getEventId = async () => {
+  const currentEventId = await AsyncStorage.getItem('currentEventId');
+  if (currentEventId === null) {
+    return null;
+  }
+  return currentEventId;
+}
+
+const loadCurrentEvent = async ({ queryKey }: any) => {
+  const [_key, currentEventId] = queryKey
+
+  if (currentEventId === null) {
+    return;
+  }
+  const docRef = doc(db, "events", currentEventId);
+  const data = await getDoc(docRef);
+  if (data.exists() === false) {
+    return null;
+  }
+  return data.data();
+}
+
+const getVendorDetailsFn = async ({ queryKey }: any) => {
+  const [_key, currentEventId] = queryKey;
+  if (currentEventId === null) {
+    return [] as any[];
+  }
+
+  const colRef = collection(db, "events", currentEventId, "vendors");
+  const objVal = {
+    reserved: 0,
+    pending: 0,
+    rejected: 0
+  }
+  const snapshot = await getDocs(colRef);
+  const data = snapshot.docs.map((doc) => {
+    const data = doc.data();
+    if (data.status === "Reserved") objVal.reserved++;
+    else if (data.status === "Pending") objVal.pending++;
+    else objVal.rejected++;
+    return objVal;
+  })
+  const arr = [
+    {
+      name: "Reserved",
+      count: objVal.reserved + 100,
+      color: "#F44336",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15
+    },
+    {
+      name: "Pending",
+      count: objVal.pending + 100,
+      color: "#FFC107",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15
+    },
+    {
+      name: "Rejected",
+      count: objVal.rejected + 100,
+      color: "#9C27B0",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15
+    }
+  ]
+  return arr;
+}
+
 
 export default function TabHomeScreen() {
 
@@ -24,24 +94,22 @@ export default function TabHomeScreen() {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation<StackNavigationProp<RootStack, 'StartNew'>>();
 
-  useEffect(() => {
-    (async function lloadCurrentEvent() {
-      const currentEventId = await AsyncStorage.getItem('currentEventId');
+  const eventId = useQuery({
+    queryKey: ["currentEventId"],
+    queryFn: getEventId,
+  })
 
-      if (currentEventId === null) {
-        return;
-      }
-      const docRef = doc(db, "events", currentEventId);
+  const loadEvent = useQuery({
+    queryKey: ["currentEvent", eventId.data],
+    queryFn: loadCurrentEvent,
+    enabled: !!eventId.data
+  })
 
-      const unsubscribe = onSnapshot(docRef, (doc) => {
-        const data = doc.data();
-        setEvent(data);
-        console.log(`data for current event : ${JSON.stringify(data)}`);
-      })
-
-      return unsubscribe;
-    })()
-  }, [])
+  const vendorDetailsFn = useQuery({
+    queryKey: ["vendorDetails", eventId.data],
+    queryFn: getVendorDetailsFn,
+    enabled: !!eventId.data,
+  })
 
   return (
     <ScrollView>
@@ -53,7 +121,7 @@ export default function TabHomeScreen() {
               style={{ width: 50, height: 50, borderRadius: 50 / 2 }}
             />
             <View>
-              <Text className='text-lg text-black'>{event && event.name || "Event name"}</Text>
+              <Text className='text-lg text-black'>{loadEvent.data && loadEvent.data.name || "Event name"}</Text>
               <View className='flex flex-row gap-x-2'>
                 <Text className='text-gray-400'>Date</Text>
                 <Text className='text-gray-400'>Your event</Text>
@@ -82,7 +150,7 @@ export default function TabHomeScreen() {
                 style={{ width: 50, height: 50, borderRadius: 50 / 2 }}
               />
               <View>
-                <Text className='text-lg text-black'>{event && event.name || "Event name"}</Text>
+                <Text className='text-lg text-black'>{loadEvent.data && loadEvent.data.name || "Event name"}</Text>
                 <View className='flex flex-row gap-x-2'>
                   <Text className='text-gray-400'>Date</Text>
                   <Text className='text-gray-400'>Your event</Text>
@@ -202,32 +270,157 @@ export default function TabHomeScreen() {
         </View>
       </View>
       {/* Pie charts */}
-      <View className='bg-white'>
-        <View className='flex flex-row gap-x-3 items-center'>
-          <Ionicons name="person-outline" size={24} color="black" />
-          <Text>GUESTS</Text>
-        </View>
-        <Divider width={0.8} style={{
-          marginTop: 5,
-        }} />
-        <View className='w-16 h-16 rounded-full bg-cyan-200'>
-          <Text className='text-center'>Chart</Text>
-        </View>
-        <View>
-          <View className='flex flex-row justify-start gap-x-3 items-center'>
-            <View className='bg-rose-600 w-2 h-2 rounded-full'></View>
-            <Text>0</Text>
-            <Text>accepted</Text>
+      <View className='flex flex-row justify-between items-center m-1'>
+        <View className='bg-white w-1/2 border border-transparent rounded-lg overflow-hidden p-2'>
+          <View className='flex flex-row gap-x-3 items-center'>
+            <Ionicons name="person-outline" size={24} color="black" />
+            <Text>GUESTS</Text>
           </View>
-          <View className='flex flex-row justify-start gap-x-3 items-center'>
-            <View className='bg-yellow-600 w-2 h-2 rounded-full'></View>
-            <Text>0</Text>
-            <Text>pending</Text>
+          <Divider width={0.8} style={{
+            marginTop: 5,
+          }} />
+          <PieChart data={vendorDetailsFn.status === "success" ? vendorDetailsFn.data : [
+            {
+              name: "Seoul",
+              count: 21500000,
+              color: "rgba(131, 167, 234, 1)",
+              legendFontColor: "#7F7F7F",
+              legendFontSize: 15
+            },
+            {
+              name: "Toronto",
+              count: 2800000,
+              color: "#F00",
+              legendFontColor: "#7F7F7F",
+              legendFontSize: 15
+            },
+            {
+              name: "Beijing",
+              count: 527612,
+              color: "red",
+              legendFontColor: "#7F7F7F",
+              legendFontSize: 15
+            },
+            {
+              name: "New York",
+              count: 8538000,
+              color: "#ffffff",
+              legendFontColor: "#7F7F7F",
+              legendFontSize: 15
+            },
+            {
+              name: "Moscow",
+              count: 11920000,
+              color: "rgb(0, 0, 255)",
+              legendFontColor: "#7F7F7F",
+              legendFontSize: 15
+            }]
+          }
+            accessor='count' backgroundColor={"transparent"} hasLegend={false}
+            paddingLeft='0' absolute width={Dimensions.get("window").width} height={120}
+            chartConfig={{
+              backgroundGradientFrom: "#1E2923",
+              backgroundGradientFromOpacity: 0,
+              backgroundGradientTo: "#08130D",
+              backgroundGradientToOpacity: 0.5,
+              color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+              strokeWidth: 2, // optional, default 3
+              barPercentage: 0.5,
+              useShadowColorFromDataset: false // optional
+            }}
+          />
+          <View className='flex flex-col justify-center items-center'>
+            <View className='flex flex-row justify-start gap-x-3 items-center'>
+              <View className='bg-rose-600 w-2 h-2 rounded-full'></View>
+              <Text>0</Text>
+              <Text>accepted</Text>
+            </View>
+            <View className='flex flex-row justify-start gap-x-3 items-center'>
+              <View className='bg-yellow-600 w-2 h-2 rounded-full'></View>
+              <Text>0</Text>
+              <Text>pending</Text>
+            </View>
+            <View className='flex flex-row justify-start gap-x-3 items-center'>
+              <View className='bg-purple-600 w-2 h-2 rounded-full'></View>
+              <Text>0</Text>
+              <Text>denied</Text>
+            </View>
           </View>
-          <View className='flex flex-row justify-start gap-x-3 items-center'>
-            <View className='bg-purple-600 w-2 h-2 rounded-full'></View>
-            <Text>0</Text>
-            <Text>denied</Text>
+        </View>
+        <View className='bg-white w-1/2 border border-transparent rounded-lg overflow-hidden p-2'>
+          <View className='flex flex-row gap-x-3 items-center'>
+            <Ionicons name="person-outline" size={24} color="black" />
+            <Text>GUESTS</Text>
+          </View>
+          <Divider width={0.8} style={{
+            marginTop: 5,
+          }} />
+          <PieChart data={vendorDetailsFn.status === "success" ? vendorDetailsFn.data : [
+            {
+              name: "Seoul",
+              count: 21500000,
+              color: "rgba(131, 167, 234, 1)",
+              legendFontColor: "#7F7F7F",
+              legendFontSize: 15
+            },
+            {
+              name: "Toronto",
+              count: 2800000,
+              color: "#F00",
+              legendFontColor: "#7F7F7F",
+              legendFontSize: 15
+            },
+            {
+              name: "Beijing",
+              count: 527612,
+              color: "red",
+              legendFontColor: "#7F7F7F",
+              legendFontSize: 15
+            },
+            {
+              name: "New York",
+              count: 8538000,
+              color: "#ffffff",
+              legendFontColor: "#7F7F7F",
+              legendFontSize: 15
+            },
+            {
+              name: "Moscow",
+              count: 11920000,
+              color: "rgb(0, 0, 255)",
+              legendFontColor: "#7F7F7F",
+              legendFontSize: 15
+            }]
+          }
+            accessor='count' backgroundColor={"transparent"} hasLegend={false}
+            paddingLeft='0' absolute width={Dimensions.get("window").width} height={120}
+            chartConfig={{
+              backgroundGradientFrom: "#1E2923",
+              backgroundGradientFromOpacity: 0,
+              backgroundGradientTo: "#08130D",
+              backgroundGradientToOpacity: 0.5,
+              color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+              strokeWidth: 2, // optional, default 3
+              barPercentage: 0.5,
+              useShadowColorFromDataset: false // optional
+            }}
+          />
+          <View className='flex flex-col items-center justify-center'>
+            <View className='flex flex-row justify-start gap-x-3 items-center'>
+              <View className='bg-rose-600 w-2 h-2 rounded-full'></View>
+              <Text>{vendorDetailsFn.data && vendorDetailsFn.data[0].count}</Text>
+              <Text>reserved</Text>
+            </View>
+            <View className='flex flex-row justify-start gap-x-3 items-center'>
+              <View className='bg-yellow-600 w-2 h-2 rounded-full'></View>
+              <Text>{vendorDetailsFn.data && vendorDetailsFn.data[1].count}</Text>
+              <Text>pending</Text>
+            </View>
+            <View className='flex flex-row justify-start gap-x-3 items-center'>
+              <View className='bg-purple-600 w-2 h-2 rounded-full'></View>
+              <Text>{vendorDetailsFn.data && vendorDetailsFn.data[2].count}</Text>
+              <Text>denied</Text>
+            </View>
           </View>
         </View>
       </View>

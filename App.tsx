@@ -27,10 +27,19 @@ import VendorsFormModal from './screens/VendorsFormModal';
 import VendorDetails from './screens/VendorDetails';
 import PaymentVendorForm from './screens/PaymentVendorForm';
 import ChangeNameModal from './screens/ChangeNameModal';
+import { store } from "./store";
+import { Provider } from "react-redux";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
 
 export type RootStack = {
   Home: {
-    screen: string;
+    screen?: string;
   };
   Start: undefined;
   StartNew: undefined;
@@ -130,6 +139,7 @@ export type RootStack = {
 }
 
 const Stack = createStackNavigator<RootStack>();
+const queryClient = new QueryClient();
 
 const tokenCache = {
   async getToken(key: string) {
@@ -151,87 +161,89 @@ const tokenCache = {
 export default function App() {
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={process.env.CLERK_PUBLISHABLE_KEY}>
-      <NavigationContainer>
-        <SafeAreaProvider>
-          <Stack.Navigator initialRouteName='Start'>
-            <Stack.Screen name="Home" component={TabNavigator} options={{
-              headerShown: false
-            }} />
-            <Stack.Screen name="Start" component={StartScreen} options={{
-              headerShown: false
-            }} />
-            <Stack.Screen name="StartNew" component={StartNewScreen} options={{
-              headerShown: false,
-            }} />
-            <Stack.Screen name="Vendors" component={Vendors} options={{
-              presentation: "modal"
-            }} />
-            <Stack.Screen name="Settings" component={Settings} options={{
-              presentation: "modal"
-            }} />
-            <Stack.Screen name="Messages" component={Messages} options={{
-              presentation: "modal"
-            }} />
-            <Stack.Screen name="Helpers" component={Helpers} options={{
-              presentation: "modal"
-            }} />
-            <Stack.Screen name="Events" component={Events} options={{
-              presentation: "modal"
-            }} />
-            <Stack.Screen name="Schedule" component={Schedule} options={{
-              presentation: "modal"
-            }} />
-            <Stack.Screen name="BudgetModal" component={BudgetModal} options={{
-              presentation: "modal",
-              title: "Add a new cost"
-            }} />
-            <Stack.Screen name="GuestModal" component={GuestModal} options={{
-              presentation: "modal",
-              title: "Add a new guest"
-            }} />
-            <Stack.Screen name='GuestContactModal' component={GuestContactModal} options={{
-              presentation: "modal",
-              title: "Add a new guest"
-            }} />
-            <Stack.Screen name="BudgetItemModal" component={BudgetItemModal} options={{
-              presentation: "modal",
-            }} />
-            <Stack.Screen name="PaymentModal" component={PaymentModal} options={{
-              presentation: "modal",
-              title: "Add a new payment"
-            }} />
-            <Stack.Screen name="CheckListModal" component={CheckListScreen} options={{
-              presentation: "modal",
-              title: "Add a new task"
-            }} />
-            <Stack.Screen name="CheckListDetail" component={CheckListDetail} options={{
-              presentation: "modal",
-              title: "Task Details"
-            }} />
-            <Stack.Screen name="SubTask" component={SubtaskScreen} options={{
-              presentation: "modal",
-              title: "Add a new subtask"
-            }} />
-            <Stack.Screen name="VendorsForm" component={VendorsFormModal} options={{
-              presentation: "modal",
-              title: "Add a new vendor"
-            }} />
-            <Stack.Screen name="VendorsDetailModal" component={VendorDetails} options={{
-              presentation: "modal",
-              title: "Vendor Details"
-            }} />
-            <Stack.Screen name="PaymentVendorForm" component={PaymentVendorForm} options={{
-              presentation: "modal",
-              title: "Add a new payment"
-            }} />
-            <Stack.Screen name="ChainNameSettings" component={ChangeNameModal} options={{
-              presentation: "modal",
-              title: "User"
-            }} />
-          </Stack.Navigator>
-        </SafeAreaProvider>
-      </NavigationContainer>
-    </ClerkProvider>
+    <QueryClientProvider client={queryClient}>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={process.env.CLERK_PUBLISHABLE_KEY}>
+        <NavigationContainer>
+          <SafeAreaProvider>
+            <Stack.Navigator initialRouteName='Start'>
+              <Stack.Screen name="Home" component={TabNavigator} options={{
+                headerShown: false
+              }} />
+              <Stack.Screen name="Start" component={StartScreen} options={{
+                headerShown: false
+              }} />
+              <Stack.Screen name="StartNew" component={StartNewScreen} options={{
+                headerShown: false,
+              }} />
+              <Stack.Screen name="Vendors" component={Vendors} options={{
+                presentation: "modal"
+              }} />
+              <Stack.Screen name="Settings" component={Settings} options={{
+                presentation: "modal"
+              }} />
+              <Stack.Screen name="Messages" component={Messages} options={{
+                presentation: "modal"
+              }} />
+              <Stack.Screen name="Helpers" component={Helpers} options={{
+                presentation: "modal"
+              }} />
+              <Stack.Screen name="Events" component={Events} options={{
+                presentation: "modal"
+              }} />
+              <Stack.Screen name="Schedule" component={Schedule} options={{
+                presentation: "modal"
+              }} />
+              <Stack.Screen name="BudgetModal" component={BudgetModal} options={{
+                presentation: "modal",
+                title: "Add a new cost"
+              }} />
+              <Stack.Screen name="GuestModal" component={GuestModal} options={{
+                presentation: "modal",
+                title: "Add a new guest"
+              }} />
+              <Stack.Screen name='GuestContactModal' component={GuestContactModal} options={{
+                presentation: "modal",
+                title: "Add a new guest"
+              }} />
+              <Stack.Screen name="BudgetItemModal" component={BudgetItemModal} options={{
+                presentation: "modal",
+              }} />
+              <Stack.Screen name="PaymentModal" component={PaymentModal} options={{
+                presentation: "modal",
+                title: "Add a new payment"
+              }} />
+              <Stack.Screen name="CheckListModal" component={CheckListScreen} options={{
+                presentation: "modal",
+                title: "Add a new task"
+              }} />
+              <Stack.Screen name="CheckListDetail" component={CheckListDetail} options={{
+                presentation: "modal",
+                title: "Task Details"
+              }} />
+              <Stack.Screen name="SubTask" component={SubtaskScreen} options={{
+                presentation: "modal",
+                title: "Add a new subtask"
+              }} />
+              <Stack.Screen name="VendorsForm" component={VendorsFormModal} options={{
+                presentation: "modal",
+                title: "Add a new vendor"
+              }} />
+              <Stack.Screen name="VendorsDetailModal" component={VendorDetails} options={{
+                presentation: "modal",
+                title: "Vendor Details"
+              }} />
+              <Stack.Screen name="PaymentVendorForm" component={PaymentVendorForm} options={{
+                presentation: "modal",
+                title: "Add a new payment"
+              }} />
+              <Stack.Screen name="ChainNameSettings" component={ChangeNameModal} options={{
+                presentation: "modal",
+                title: "User"
+              }} />
+            </Stack.Navigator>
+          </SafeAreaProvider>
+        </NavigationContainer>
+      </ClerkProvider>
+    </QueryClientProvider>
   );
 }

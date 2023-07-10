@@ -247,7 +247,8 @@ export default function TabHomeScreen() {
             <Octicons name="checklist" size={24} color="black" />
             <Text className='text-lg'>CHECKLIST</Text>
           </View>
-          <TouchableOpacity className='flex flex-row gap-x-1 items-center justify-center'>
+          <TouchableOpacity className='flex flex-row gap-x-1 items-center justify-center'
+            onPress={() => navigation.navigate("CheckListSummaryModal")}>
             <Text className='text-black text-lg'>Summary</Text>
             <AntDesign name="right" size={18} color="black" />
           </TouchableOpacity>

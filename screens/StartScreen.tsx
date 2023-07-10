@@ -81,7 +81,7 @@ const LogInDialog = (props: LogInDialogProps) => {
             })
 
             await setActive({ session: completeSignup.createdSessionId });
-            navigation.replace("Home");
+            navigation.replace("Home", {});
         } catch (error: any) {
             console.error(JSON.stringify(error, null, 2));
             setError(error.message);
@@ -98,7 +98,7 @@ const LogInDialog = (props: LogInDialogProps) => {
                 password: password,
             })
             await signInSetActive({ session: completeSignIn.createdSessionId });
-            navigation.replace("Home");
+            navigation.replace("Home", {});
         } catch (error) {
             console.error(JSON.stringify(error, null, 2));
         }
@@ -190,7 +190,7 @@ export default function StartScreen() {
         if (isSignedIn) {
             navigation.replace("StartNew");
         }
-    }, [isSignedIn])
+    })
 
     return (
         <SafeAreaView className='flex flex-col justify-evenly h-full'>

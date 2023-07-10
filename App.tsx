@@ -27,15 +27,11 @@ import VendorsFormModal from './screens/VendorsFormModal';
 import VendorDetails from './screens/VendorDetails';
 import PaymentVendorForm from './screens/PaymentVendorForm';
 import ChangeNameModal from './screens/ChangeNameModal';
-import { store } from "./store";
-import { Provider } from "react-redux";
 import {
-  useQuery,
-  useMutation,
-  useQueryClient,
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
+import CheckListSummaryModal from './screens/CheckListSummaryModal';
 
 export type RootStack = {
   Home: {
@@ -136,6 +132,7 @@ export type RootStack = {
     paymentId?: string;
   },
   ChainNameSettings: undefined;
+  CheckListSummaryModal: undefined;
 }
 
 const Stack = createStackNavigator<RootStack>();
@@ -239,6 +236,10 @@ export default function App() {
               <Stack.Screen name="ChainNameSettings" component={ChangeNameModal} options={{
                 presentation: "modal",
                 title: "User"
+              }} />
+              <Stack.Screen name="CheckListSummaryModal" component={CheckListSummaryModal} options={{
+                presentation: "modal",
+                title: "Summary"
               }} />
             </Stack.Navigator>
           </SafeAreaProvider>

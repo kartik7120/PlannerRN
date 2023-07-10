@@ -6,7 +6,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Category } from './CheckListScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { RootStack } from '../App';
@@ -98,6 +98,17 @@ export default function VendorsFormModal() {
             if (!eventId) return;
             const colRef = collection(db, 'events', eventId, 'vendors');
             await addDoc(colRef, { ...data, category: data.category, status: data.status, paid: 0, pending: 0 });
+            const docRef = doc(db, 'events', eventId, "vendors");
+            const docData = await getDoc(docRef);
+            const objVal = () => {
+                if (route.params.status === "Pending") return { pending: docData.data()?.pending + 1 }
+                else if (route.params.status === "Reserved") return { reserved: docData.data()?.reserved + 1 }
+                else return { rejected: docData.data()?.rejected + 1 }
+            }
+            await updateDoc(docRef, {
+                ...docData.data(),
+                ...objVal()
+            })
             navigation.goBack();
         } catch (error) {
             console.log(error);
@@ -123,6 +134,21 @@ export default function VendorsFormModal() {
                 amount: data.amount,
                 status: data.status,
             });
+            const docRef2 = doc(db, 'events', eventId, "vendors");
+            const docData = await getDoc(docRef2);
+            const objVal = () => {
+                if (route.params.status === "Pending" && data.status === "Reserved") return { pending: docData.data()?.pending - 1, reserved: docData.data()?.reserved + 1 }
+                else if (route.params.status === "Pending" && data.status === "Rejected") return { pending: docData.data()?.pending - 1, rejected: docData.data()?.rejected + 1 }
+                else if (route.params.status === "Reserved" && data.status === "Pending") return { pending: docData.data()?.pending + 1, reserved: docData.data()?.reserved - 1 }
+                else if (route.params.status === "Reserved" && data.status === "Rejected") return { reserved: docData.data()?.reserved - 1, rejected: docData.data()?.rejected + 1 }
+                else if (route.params.status === "Rejected" && data.status === "Pending") return { pending: docData.data()?.pending + 1, rejected: docData.data()?.rejected - 1 }
+                else if (route.params.status === "Rejected" && data.status === "Reserved") return { reserved: docData.data()?.reserved + 1, rejected: docData.data()?.rejected - 1 }
+                else return {}
+            }
+            await updateDoc(docRef2, {
+                ...docData.data(),
+                ...objVal()
+            })
             navigation.goBack();
         } catch (error) {
             console.log(error);

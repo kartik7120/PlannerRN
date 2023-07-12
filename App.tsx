@@ -27,11 +27,15 @@ import VendorsFormModal from './screens/VendorsFormModal';
 import VendorDetails from './screens/VendorDetails';
 import PaymentVendorForm from './screens/PaymentVendorForm';
 import ChangeNameModal from './screens/ChangeNameModal';
+import { TouchableOpacity } from "react-native";
 import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
 import CheckListSummaryModal from './screens/CheckListSummaryModal';
+import BudgetSummaryModal from './screens/BudgetSummaryModal';
+import { Feather } from '@expo/vector-icons';
+import BudgetSettingsModal from './screens/BudgetSettingsModal';
 
 export type RootStack = {
   Home: {
@@ -131,8 +135,12 @@ export type RootStack = {
     edit?: boolean;
     paymentId?: string;
   },
-  ChainNameSettings: undefined;
-  CheckListSummaryModal: undefined;
+  ChainNameSettings: undefined,
+  CheckListSummaryModal: undefined,
+  BudgetSummaryModal: undefined,
+  BudgetSettingsModal: {
+    budget: string;
+  }
 }
 
 const Stack = createStackNavigator<RootStack>();
@@ -240,6 +248,22 @@ export default function App() {
               <Stack.Screen name="CheckListSummaryModal" component={CheckListSummaryModal} options={{
                 presentation: "modal",
                 title: "Summary"
+              }} />
+              <Stack.Screen name="BudgetSummaryModal" component={BudgetSummaryModal} options={{
+                presentation: "modal",
+                title: "Summary",
+                headerRight: () => (
+                  <TouchableOpacity>
+                    <Feather name="settings" size={24} color="black" />
+                  </TouchableOpacity>
+                ),
+                headerRightContainerStyle: {
+                  marginRight: 10
+                }
+              }} />
+              <Stack.Screen name="BudgetSettingsModal" component={BudgetSettingsModal} options={{
+                presentation: "modal",
+                title: "Settings"
               }} />
             </Stack.Navigator>
           </SafeAreaProvider>

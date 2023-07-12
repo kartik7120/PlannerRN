@@ -17,7 +17,7 @@ import Tick from "../assets/tick.svg";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStack } from '../App';
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 const getEventId = async () => {
   const currentEventId = await AsyncStorage.getItem('currentEventId');
@@ -87,12 +87,51 @@ const getVendorDetailsFn = async ({ queryKey }: any) => {
   return arr;
 }
 
+const getCheckListCount = async ({ queryKey }: any) => {
+  const [_key, currentEventId] = queryKey;
+  if (currentEventId === null) {
+    return {
+      count: 0,
+      completed: 0,
+    };
+  }
+
+  const colRef = collection(db, "events", currentEventId, "checklist");
+  const snapshot = await getDocs(colRef);
+
+  const obj = {
+    count: 0,
+    completed: 0,
+  }
+
+  snapshot.docs.forEach((doc) => {
+    const data = doc.data();
+    obj.count++;
+    if (data.completed === "Completed") {
+      obj.completed++;
+    }
+  })
+
+  return obj;
+}
+
 
 export default function TabHomeScreen() {
 
   const [event, setEvent] = useState<any>();
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation<StackNavigationProp<RootStack, 'StartNew'>>();
+
+  const queryClient = useQueryClient();
+  const currentEventId = queryClient.getQueryData(["currentEventId"], {
+    exact: true
+  })
+
+  const checkListCount = useQuery({
+    queryKey: ["checklistCount", currentEventId],
+    queryFn: getCheckListCount,
+    enabled: !!currentEventId
+  })
 
   const eventId = useQuery({
     queryKey: ["currentEventId"],
@@ -244,8 +283,8 @@ export default function TabHomeScreen() {
       <View className='bg-white rounded-lg overflow-hidden m-2 border-transparent p-4'>
         <View className='flex flex-row items-center justify-between'>
           <View className='flex flex-row gap-x-3 items-center'>
-            <Octicons name="checklist" size={24} color="black" />
-            <Text className='text-lg'>CHECKLIST</Text>
+            <Octicons name="checklist" size={20} color="black" />
+            <Text className='text-sm'>CHECKLIST</Text>
           </View>
           <TouchableOpacity className='flex flex-row gap-x-1 items-center justify-center'
             onPress={() => navigation.navigate("CheckListSummaryModal")}>
@@ -261,12 +300,12 @@ export default function TabHomeScreen() {
             <Image source={require("../assets/analytics.png")} style={{ width: 50, height: 50, resizeMode: "contain" }} />
             <Text className='text-center'>There are no uncompleted tasks</Text>
           </View>
-          <LinearProgress value={0} color='red' style={{
+          <LinearProgress value={checkListCount.data && checkListCount.data.completed} color='red' style={{
             height: 15,
           }} />
           <View className='flex flex-row justify-between items-center'>
-            <Text>0% completed</Text>
-            <Text>0 out of 0</Text>
+            <Text>{checkListCount.data && ((checkListCount.data.completed / checkListCount.data?.count) * 100)}% completed</Text>
+            <Text>{checkListCount.data?.completed} out of {checkListCount.data && checkListCount.data.count}</Text>
           </View>
         </View>
       </View>
@@ -425,13 +464,13 @@ export default function TabHomeScreen() {
           </View>
         </View>
       </View>
-      <View className='bg-white m-2 rounded overflow-hidden'>
+      <View className='bg-white m-2 rounded overflow-hidden p-2'>
         <View className='flex flex-row justify-between'>
           <View className='flex flex-row gap-x-2 items-center'>
             <AntDesign name="creditcard" size={24} color="black" />
             <Text>Budget</Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("BudgetSummaryModal")}>
             <View className='flex flex-row gap-x-2 items-center'>
               <Text className='text-lg'>Summary</Text>
               <AntDesign name="right" size={18} color="black" />
@@ -446,21 +485,21 @@ export default function TabHomeScreen() {
             <Text>Budget</Text>
             <View className='flex flex-row justify-between items-center gap-x-2'>
               <View className='w-2 h-2 rounded-full bg-gray-500'></View>
-              <Text>Not defined</Text>
+              <Text>{loadEvent.data?.Budget}</Text>
             </View>
           </View>
           <View className='flex flex-row justify-between items-center'>
             <Text>Paid</Text>
             <View className='flex flex-row justify-between items-center gap-x-2'>
               <View className='w-2 h-2 rounded-full bg-rose-500'></View>
-              <Text>$ 0</Text>
+              <Text>$ {loadEvent.data?.paid}</Text>
             </View>
           </View>
           <View className='flex flex-row justify-between items-center'>
             <Text>Pending</Text>
             <View className='flex flex-row justify-between items-center gap-x-2'>
               <View className='w-2 h-2 rounded-full bg-yellow-500'></View>
-              <Text>$ 0</Text>
+              <Text>$ {loadEvent.data?.pending}</Text>
             </View>
           </View>
         </View>

@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native'
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { MutableRefObject, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@rneui/themed';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -30,6 +30,9 @@ export default function PaymentModal() {
             paid: "Paid",
         }
     })
+
+    const oldVal = useRef<number>(0);
+
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
     const [items, setItems] = useState([
@@ -39,6 +42,10 @@ export default function PaymentModal() {
 
     const route = useRoute<RouteTypes>();
     const navigation = useNavigation();
+
+    useEffect(() => {
+        oldVal.current = Number(route.params?.amount) || 0;
+    }, [])
 
     useEffect(() => {
         if (route.params && route.params.paymentSubmit === false) {
@@ -85,22 +92,28 @@ export default function PaymentModal() {
                 paid: data.paid,
             })
             const docRef2 = doc(db, `events/${eventId}/budget/${budgetItemId}`);
+            const docRef3 = doc(db, `events/${eventId}`);
             const budgetItemDoc = await getDoc(docRef2);
+            const eventDoc = await getDoc(docRef3);
             if (data.paid === "Paid") {
                 await updateDoc(docRef2, {
-                    paid: budgetItemDoc.data()?.paid + parseInt(data.amount),
+                    paid: budgetItemDoc.data()?.paid + parseInt(data.amount) - oldVal.current,
+                })
+                await updateDoc(docRef3, {
+                    paid: eventDoc.data()?.paid + parseInt(data.amount) - oldVal.current,
                 })
             } else {
                 await updateDoc(docRef2, {
-                    pending: budgetItemDoc.data()?.pending + parseInt(data.amount),
+                    pending: budgetItemDoc.data()?.pending + parseInt(data.amount) - oldVal.current,
+                })
+                await updateDoc(docRef3, {
+                    pending: eventDoc.data()?.pending + parseInt(data.amount) - oldVal.current,
                 })
             }
-            console.log("Document written with ID: ", docRef.id);
             navigation.goBack();
         } catch (error) {
             console.error("Error adding document: ", error);
         }
-        console.log(data)
     }
 
     async function editPayment(data: Form) {
@@ -112,6 +125,7 @@ export default function PaymentModal() {
                 return;
             }
             const docRef = doc(db, `events/${eventId}/budget/${budgetItemId}/payments/${route.params.paymentId}`);
+
             await updateDoc(docRef, {
                 name: data.name,
                 note: data.note,
@@ -119,6 +133,25 @@ export default function PaymentModal() {
                 paidDate: data.paidDate,
                 paid: data.paid,
             })
+            const docRef2 = doc(db, `events/${eventId}/budget/${budgetItemId}`);
+            const docRef3 = doc(db, `events/${eventId}`);
+            const budgetItemDoc = await getDoc(docRef2);
+            const eventDoc = await getDoc(docRef3);
+            if (data.paid === "Paid") {
+                await updateDoc(docRef2, {
+                    paid: budgetItemDoc.data()?.paid + parseInt(data.amount),
+                })
+                await updateDoc(docRef3, {
+                    paid: eventDoc.data()?.paid + parseInt(data.amount),
+                })
+            } else {
+                await updateDoc(docRef2, {
+                    pending: budgetItemDoc.data()?.pending + parseInt(data.amount),
+                })
+                await updateDoc(docRef3, {
+                    pending: eventDoc.data()?.pending + parseInt(data.amount),
+                })
+            }
             navigation.goBack();
         } catch (error) {
             console.error("Error updating document: ", error);

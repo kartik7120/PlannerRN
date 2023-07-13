@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form';
 import { Button, Input } from '@rneui/themed';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -46,8 +46,7 @@ export default function VendorsFormModal() {
 
     const navigation = useNavigation<NavigationProps>();
     const route = useRoute<RProps>();
-
-
+    const oldVal = useRef<number>(0);
 
     const [items2, setItems2] = useState([
         { label: 'Attire & Accessories', value: 'Attire', },
@@ -89,6 +88,9 @@ export default function VendorsFormModal() {
         }
     }, [route.params])
 
+    useEffect(() => {
+        oldVal.current = Number(route.params.amount)
+    }, [route.params.amount])
 
     const onSubmit = async (data: Form) => {
         setFormValue("category", value2);
@@ -100,6 +102,8 @@ export default function VendorsFormModal() {
             await addDoc(colRef, { ...data, category: data.category, status: data.status, paid: 0, pending: 0 });
             const docRef = doc(db, 'events', eventId, "vendors");
             const docData = await getDoc(docRef);
+            const docRef2 = doc(db, 'events', eventId);
+            const docData2 = await getDoc(docRef2);
             const objVal = () => {
                 if (route.params.status === "Pending") return { pending: docData.data()?.pending + 1 }
                 else if (route.params.status === "Reserved") return { reserved: docData.data()?.reserved + 1 }
@@ -109,6 +113,16 @@ export default function VendorsFormModal() {
                 ...docData.data(),
                 ...objVal()
             })
+
+            if (route.params.status === "Pending") {
+                await updateDoc(docRef2, {
+                    pending: docData2.data()?.pending + Number(data.amount)
+                })
+            } else if (route.params.status === "Reserved") {
+                await updateDoc(docRef2, {
+                    paid: docData2.data()?.paid + Number(data.amount)
+                })
+            }
             navigation.goBack();
         } catch (error) {
             console.log(error);
@@ -136,6 +150,8 @@ export default function VendorsFormModal() {
             });
             const docRef2 = doc(db, 'events', eventId, "vendors");
             const docData = await getDoc(docRef2);
+            const docRef3 = doc(db, 'events', eventId);
+            const docData2 = await getDoc(docRef3);
             const objVal = () => {
                 if (route.params.status === "Pending" && data.status === "Reserved") return { pending: docData.data()?.pending - 1, reserved: docData.data()?.reserved + 1 }
                 else if (route.params.status === "Pending" && data.status === "Rejected") return { pending: docData.data()?.pending - 1, rejected: docData.data()?.rejected + 1 }
@@ -149,6 +165,33 @@ export default function VendorsFormModal() {
                 ...docData.data(),
                 ...objVal()
             })
+            if (route.params.status === "Pending" && data.status === "Reserved") {
+                await updateDoc(docRef3, {
+                    pending: docData2.data()?.pending - Number(data.amount),
+                    paid: docData2.data()?.paid + Number(data.amount)
+                })
+            } else if (route.params.status === "Pending" && data.status === "Rejected") {
+                await updateDoc(docRef3, {
+                    pending: docData2.data()?.pending - Number(data.amount),
+                })
+            } else if (route.params.status === "Reserved" && data.status === "Pending") {
+                await updateDoc(docRef3, {
+                    pending: docData2.data()?.pending + Number(data.amount),
+                    paid: docData2.data()?.paid - Number(data.amount)
+                })
+            } else if (route.params.status === "Reserved" && data.status === "Rejected") {
+                await updateDoc(docRef3, {
+                    paid: docData2.data()?.paid - Number(data.amount)
+                })
+            } else if (route.params.status === "Rejected" && data.status === "Pending") {
+                await updateDoc(docRef3, {
+                    pending: docData2.data()?.pending + Number(data.amount),
+                })
+            } else if (route.params.status === "Rejected" && data.status === "Reserved") {
+                await updateDoc(docRef3, {
+                    paid: docData2.data()?.paid + data.amount
+                })
+            }
             navigation.goBack();
         } catch (error) {
             console.log(error);

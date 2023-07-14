@@ -6,6 +6,10 @@ import { Dialog } from '@rneui/themed';
 import * as Clipboard from 'expo-clipboard';
 import { useQueryClient } from '@tanstack/react-query';
 
+const getHelpers = async ({ queryKey }: any) => {
+  
+}
+
 export default function Helpers() {
 
   const [visible, setVisible] = useState(false);

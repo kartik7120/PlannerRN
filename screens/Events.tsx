@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity } from 'react-native'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { db } from '../firebase'
 import { useUser } from '@clerk/clerk-expo'
-import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
+import { addDoc, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { Button, Dialog, Image, Input } from '@rneui/themed';
 import NewEvent from '../components/NewEvent';
 import { FAB } from '@rneui/base';
@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useNavigation } from '@react-navigation/native';
 import Tick from "../assets/tick.svg";
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Form {
   name: string;
@@ -50,6 +51,7 @@ export default function Events({ route }: any) {
   const navigation = useNavigation<StackNavigationProp<RootStack, 'StartNew'>>();
   const { user, isSignedIn } = useUser();
   const [currentEventId, setCurrentEventId] = useState("");
+  const queryClient = useQueryClient();
 
   const { control: JoinFormControl, formState: { errors: JoinFormErrors }, handleSubmit: JoinFormHandleSubmit } = useForm<JoinForm>({
     defaultValues: {
@@ -63,7 +65,7 @@ export default function Events({ route }: any) {
       return;
     }
     const colRef = collection(db, "events");
-    const q = query(colRef, where("userId", "==", user?.id))
+    const q = query(colRef, where("userId", "array-contains", user?.id))
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setEvents(snapshot.docs.map((doc) => {
         return {
@@ -144,10 +146,14 @@ export default function Events({ route }: any) {
           Budget: data.Budget,
           date: data.date,
           time: data.time,
-          userId: user?.id
+          userId: arrayUnion(user?.id),
         }).then(async (data) => {
           try {
             await AsyncStorage.setItem("currentEventId", data.id);
+            queryClient.invalidateQueries({
+              queryKey: ["currentEventId"],
+              exact: true
+            })
           } catch (error) {
             console.log('error occured while saving current event id');
             console.log(error);
@@ -156,7 +162,7 @@ export default function Events({ route }: any) {
       } catch (error) {
         console.log('error occured while creating event', error);
       }
-      navigation.navigate("Home")
+      navigation.navigate("Home", {})
     }
   }
 
@@ -198,13 +204,17 @@ export default function Events({ route }: any) {
   const handleChangeEvent = async (eventId: string) => {
     try {
       await AsyncStorage.setItem("currentEventId", eventId);
+      queryClient.invalidateQueries({
+        queryKey: ["currentEventId"],
+        exact: true
+      })
       setCurrentEventId(eventId);
     } catch (error) {
       console.log('error occured while saving current event id');
       console.log(error);
     }
   }
-  
+
   return (
     <>
       <Dialog isVisible={dialogVisible} onBackdropPress={() => {

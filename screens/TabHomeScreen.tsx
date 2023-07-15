@@ -11,13 +11,14 @@ import {
   PieChart,
 } from "react-native-chart-kit";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, doc, getDoc, getDocs, onSnapshot } from "firebase/firestore"
+import { collection, doc, getDoc, getDocs, onSnapshot, query, where } from "firebase/firestore"
 import { db } from '../firebase';
 import Tick from "../assets/tick.svg";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStack } from '../App';
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useUser } from '@clerk/clerk-expo';
 
 const getEventId = async () => {
   const currentEventId = await AsyncStorage.getItem('currentEventId');
@@ -115,6 +116,24 @@ const getCheckListCount = async ({ queryKey }: any) => {
   return obj;
 }
 
+const loadUserEvents = async ({ queryKey }: any) => {
+  const [_key, userId] = queryKey;
+  if (userId === null) {
+    return [];
+  }
+
+  const colRef = collection(db, "events");
+  const q = query(colRef, where("userId", "==", userId));
+  const snapshot = await getDocs(q);
+  const data = snapshot.docs.map((doc) => {
+    return {
+      eventId: doc.id,
+      ...doc.data()
+    } as any
+  })
+
+  return data;
+}
 
 export default function TabHomeScreen() {
 
@@ -126,6 +145,8 @@ export default function TabHomeScreen() {
   const currentEventId = queryClient.getQueryData(["currentEventId"], {
     exact: true
   })
+
+  const user = useUser();
 
   const checkListCount = useQuery({
     queryKey: ["checklistCount", currentEventId],
@@ -142,6 +163,13 @@ export default function TabHomeScreen() {
     queryKey: ["currentEvent", eventId.data],
     queryFn: loadCurrentEvent,
     enabled: !!eventId.data
+  })
+
+
+  const loadEvents = useQuery({
+    queryKey: ["userEvents", user.user?.id],
+    queryFn: loadUserEvents,
+    enabled: !!user.user?.id
   })
 
   const vendorDetailsFn = useQuery({
@@ -162,7 +190,7 @@ export default function TabHomeScreen() {
             <View>
               <Text className='text-lg text-black'>{loadEvent.data && loadEvent.data.name || "Event name"}</Text>
               <View className='flex flex-row gap-x-2'>
-                <Text className='text-gray-400'>Date</Text>
+                <Text className='text-gray-400'>{loadEvent.data && new Date(loadEvent.data.date.seconds * 1000).toDateString()}</Text>
                 <Text className='text-gray-400'>Your event</Text>
               </View>
             </View>
@@ -183,23 +211,29 @@ export default function TabHomeScreen() {
               <AntDesign name="close" size={24} color="black" />
             </TouchableOpacity>
           </View>
-          <View className='flex flex-row justify-between items-center w-full p-2 bg-white'>
-            <View className=' flex flex-row gap-x-3'>
-              <Image source={require("../assets/event_icon.jpg")}
-                style={{ width: 50, height: 50, borderRadius: 50 / 2 }}
-              />
-              <View>
-                <Text className='text-lg text-black'>{loadEvent.data && loadEvent.data.name || "Event name"}</Text>
-                <View className='flex flex-row gap-x-2'>
-                  <Text className='text-gray-400'>Date</Text>
-                  <Text className='text-gray-400'>Your event</Text>
+          {loadEvents.data && loadEvents.data.map((event) => (
+            <TouchableOpacity key={event.eventId} onPress={() => {
+              AsyncStorage.setItem("currentEventId", event.eventId);
+              queryClient.invalidateQueries(["currentEventId"]);
+              setVisible(false);
+            }}>
+              <View className='flex flex-row justify-between items-center w-full p-2 bg-white' >
+                <View className=' flex flex-row gap-x-3'>
+                  <Image source={require("../assets/event_icon.jpg")}
+                    style={{ width: 50, height: 50, borderRadius: 50 / 2 }}
+                  />
+                  <View>
+                    <Text className='text-lg text-black'>{event.name}</Text>
+                    <View className='flex flex-row gap-x-2'>
+                      <Text className='text-gray-400'>{new Date(event.date.seconds * 1000).toDateString()}</Text>
+                      <Text className='text-gray-400'>Your event</Text>
+                    </View>
+                  </View>
                 </View>
+                {queryClient.getQueryData(['currentEventId']) === event.eventId && <Tick width={32} height={32} />}
               </View>
-            </View>
-            <View>
-              <Tick width={32} height={32} />
-            </View>
-          </View>
+            </TouchableOpacity>
+          ))}
           <View className='flex flex-row justify-between items-center bg-white mt-2 gap-x-1'>
             <View className='basis-1/2'>
               <Button title="JOIN" type='outline' />

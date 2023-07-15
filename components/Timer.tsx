@@ -2,8 +2,20 @@ import { View, Text } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+
+const getEventDetail = async ({ queryKey }: any) => {
+    const [_key, eventId] = queryKey;
+    const docRef = doc(db, "events", eventId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return { ...docSnap.data(), id: docSnap.id } as any;
+    } else {
+        return null;
+    }
+}
 
 export default function Timer() {
 
@@ -14,11 +26,16 @@ export default function Timer() {
         secs: 0
     })
 
-    const [eventDetail, setEventDetail] = useState<any>(null);
+    const queryClient = useQueryClient();
+    const eventId = queryClient.getQueryData(['currentEventId'], {
+        exact: true
+    });
+
+    const eventDetailQuery = useQuery(['eventDetailTimer',eventId as string], getEventDetail);
 
     useEffect(() => {
-        if(!eventDetail) return;
-        let date1 = new Date(eventDetail.time.seconds * 1000);
+        if (!eventDetailQuery.data) return;
+        let date1 = new Date(eventDetailQuery.data.time.seconds * 1000);
         const clearIternval = setInterval(() => {
             const date2 = new Date();
             const diffTime = Math.abs(date2.getTime() - date1.getTime());
@@ -39,26 +56,7 @@ export default function Timer() {
         return () => {
             clearInterval(clearIternval);
         }
-    }, [eventDetail])
-
-    useEffect(() => {
-        async function getEventDetail() {
-            try {
-                const eventId = await AsyncStorage.getItem('currentEventId');
-                if (!eventId) return;
-                const docRef = doc(db, "events", eventId);
-                onSnapshot(docRef, (doc) => {
-                    if (doc.exists()) {
-                        console.log(`event details : ${JSON.stringify(doc.data())}`)
-                        setEventDetail({ ...doc.data(), id: doc.id });
-                    }
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        getEventDetail();
-    }, [])
+    }, [eventDetailQuery.data])
 
     return (
         <LinearGradient colors={["#ff7621", "#ff435c", "#ff0075"]} start={{

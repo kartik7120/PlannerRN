@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm, Controller, useWatch, useFormContext } from 'react-hook-form';
 import { Button, Input } from '@rneui/themed';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -77,24 +77,31 @@ export default function GuestModal() {
     const route = useRoute<RProps>();
 
     const [open, setOpen] = React.useState(false);
-    const [value, setValue] = React.useState(null);
-    const [items, setItems] = React.useState([
-        { label: 'Apple', value: 'apple' },
-        { label: 'Banana', value: 'banana' }
-    ]);
+    const [value, setValue] = React.useState<any | null>(null);
 
     const [open2, setOpen2] = React.useState(false);
-    const [value2, setValue2] = React.useState(null);
-    const [items2, setItems2] = React.useState([
-        { label: 'Apple', value: 'apple' },
-        { label: 'Banana', value: 'banana' }
-    ]);
+    const [value2, setValue2] = React.useState<any | null>(null);
 
     const style1 = "basis-1/2 p-3 text-center text-lg " + (watch === true ? "bg-orange-500 text-white" : "bg-white text-black");
     const style2 = "basis-1/2 p-3 text-center text-lg " + (watch === false ? "bg-orange-500 text-white" : "bg-white text-black");
     const style3 = "basis-1/3 p-3 text-center text-lg " + (watch2 === "Accepted" ? "bg-orange-500 text-white" : "bg-white text-black");
     const style4 = "basis-1/3 p-3 text-center text-lg " + (watch2 === "Pending" ? "bg-orange-500 text-white" : "bg-white text-black");
     const style5 = "basis-1/3 p-3 text-center text-lg " + (watch2 === "Declined" ? "bg-orange-500 text-white" : "bg-white text-black");
+
+    useEffect(() => {
+        if (route.params.edit === true) {
+            setFormValue("firstname", route.params.firstname || "");
+            setFormValue("lastname", route.params.lastname || "");
+            setFormValue("notes", route.params.notes || "");
+            setFormValue("address", route.params.address || "");
+            setFormValue("phone", route.params.phone || "");
+            setFormValue("email", route.params.email || "");
+            setFormValue("invitationSent", route.params.invitationSent || false);
+            setFormValue("invitationAccepted", route.params.invitationAccepted as GuestForm["invitationAccepted"] || "Pending");
+            setValue(route.params.age || AgeType.Adult);
+            setValue2(route.params.gender || "");
+        }
+    }, [route.params])
 
     const onSubmit = async (data: GuestForm) => {
         const colRef = collection(db, "events", id as string, "guests");
@@ -109,6 +116,9 @@ export default function GuestModal() {
         const docRef = doc(db, "events", id as string, "guests", route.params.guestId);
         await updateDoc(docRef, {
             ...data
+        });
+        queryClient.invalidateQueries(['guests', { eventId: id }], {
+            exact: true
         });
         navigation.goBack();
     }
@@ -136,7 +146,7 @@ export default function GuestModal() {
                 </View>
 
                 <View className='z-50'>
-                    <DropDownPicker open={open} value={value} setOpen={setOpen} setValue={setValue} mode='SIMPLE' listMode='SCROLLVIEW' items={[
+                    <DropDownPicker open={open} value={value} setOpen={setOpen} setValue={setValue} mode='SIMPLE' items={[
                         { label: "Adult", value: AgeType.Adult },
                         { label: "Child", value: AgeType.Child },
                         { label: "Baby", value: AgeType.Baby },
@@ -204,8 +214,11 @@ export default function GuestModal() {
                         <Text className='text-center text-lg'>Declined</Text>
                     </TouchableOpacity>
                 </View>
-
-                <Button onPress={handleSubmit(onSubmit)}>Add</Button>
+                {route.params.edit
+                    ?
+                    <Button onPress={handleSubmit(onEdit)} title={'Edit'} />
+                    : <Button onPress={handleSubmit(onSubmit)}>Add</Button>
+                }
             </View>
         </ScrollView>
     )

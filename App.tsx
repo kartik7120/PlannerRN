@@ -36,6 +36,7 @@ import CheckListSummaryModal from './screens/CheckListSummaryModal';
 import BudgetSummaryModal from './screens/BudgetSummaryModal';
 import { Feather } from '@expo/vector-icons';
 import BudgetSettingsModal from './screens/BudgetSettingsModal';
+import GuestDetailModal from './screens/GuestDetailModal';
 
 export type RootStack = {
   Home: {
@@ -52,7 +53,18 @@ export type RootStack = {
   BudgetModal: undefined;
   GuestModal: {
     guestId?: string,
-    edit?: boolean
+    edit?: boolean,
+    firstname?: string,
+    age?: string,
+    gender?: string,
+    invitation?: string,
+    lastname?: string,
+    notes?: string,
+    phone?: string,
+    email?: string,
+    address?: string,
+    invitationSent?: boolean,
+    invitationAccepted?: string,
   };
   GuestContactModal: undefined;
   BudgetItemModal: {
@@ -143,6 +155,9 @@ export type RootStack = {
   BudgetSummaryModal: undefined,
   BudgetSettingsModal: {
     budget: string;
+  },
+  GuestDetailModal: {
+    guestId: string,
   }
 }
 
@@ -267,6 +282,10 @@ export default function App() {
               <Stack.Screen name="BudgetSettingsModal" component={BudgetSettingsModal} options={{
                 presentation: "modal",
                 title: "Settings"
+              }} />
+              <Stack.Screen name="GuestDetailModal" component={GuestDetailModal} options={{
+                presentation: "modal",
+                title: "Guest Details"
               }} />
             </Stack.Navigator>
           </SafeAreaProvider>

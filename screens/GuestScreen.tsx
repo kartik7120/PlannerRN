@@ -36,10 +36,6 @@ export default function GuestScreen() {
         enabled: !!eventId
     })
 
-    if (guests.status === "success") {
-        console.log(guests.data);
-    }
-
     return (
         <ScrollView>
             <Dialog isVisible={visible} onBackdropPress={() => {
@@ -59,7 +55,11 @@ export default function GuestScreen() {
                 </TouchableOpacity>
             </Dialog>
             {guests.data && guests.data.map((guest) => (
-                <TouchableOpacity key={guest.id} className='bg-white border border-transparent rounded-lg overflow-hidden mt-2'>
+                <TouchableOpacity key={guest.id} onPress={() => {
+                    navigation.navigate("GuestDetailModal", {
+                        guestId: guest.id
+                    })
+                }} className='bg-white border border-transparent rounded-lg overflow-hidden mt-2'>
                     <View className='flex flex-row justify-between items-center p-2'>
                         <View className='flex flex-row gap-x-5'>
                             <Avatar size="large" />
@@ -71,9 +71,12 @@ export default function GuestScreen() {
                                 </View>
                             </View>
                         </View>
-                        {guest.invitationAccepted === "Declined" && <Text className='text-red-500 justify-self-end self-center'>Declined</Text>}
-                        {guest.invitationAccepted === "Accepted" && <Text className='text-green-500'>Accepted</Text>}
-                        {guest.invitationAccepted === "Pending" && <Text className='text-yellow-500'>Pending</Text>}
+                        {guest.invitationAccepted === "Declined"
+                            && <Text className='text-red-500 justify-self-end self-center'>Declined</Text>}
+                        {guest.invitationAccepted === "Accepted"
+                            && <Text className='text-green-500'>Accepted</Text>}
+                        {guest.invitationAccepted === "Pending"
+                            && <Text className='text-yellow-500'>Pending</Text>}
                     </View>
                 </TouchableOpacity>
             ))}
@@ -85,12 +88,12 @@ export default function GuestScreen() {
                 }} />
                 <Text className='text-black text-xl'>There are no guests</Text>
                 <Text className='text-gray-600'>Click + to add a new guest</Text>
-                <FAB color="orange" onPress={() => {
-                    setvisible(true);
-                }} icon={
-                    <AntDesign name="plus" size={24} color="black" />
-                } placement='right' />
             </View>}
+            <FAB color="orange" onPress={() => {
+                setvisible(true);
+            }} icon={
+                <AntDesign name="plus" size={24} color="black" />
+            } placement='right' />
             <StatusBar style="dark" />
         </ScrollView>
     )

@@ -3,10 +3,10 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import TabHomeScreen from './TabHomeScreen';
 import TabCheckListScreen from './TabCheckListScreen';
-import TabGuestScreen from './TabGuestScreen';
 import TabBudgetScreen from './TabBudgetScreen';
 import TabMenuScreen from './TabMenuScreen';
 import { AntDesign, Octicons } from '@expo/vector-icons';
+import GuestScreen from './GuestScreen';
 
 export type RootTab = {
     First: undefined;
@@ -44,12 +44,13 @@ const TabNavigator = () => {
                     marginLeft: 10,
                 },
             }} />
-            <Tab.Screen name="Guests" component={TabGuestScreen} options={{
+            <Tab.Screen name="Guests" component={GuestScreen} options={{
                 tabBarIcon: () => (<AntDesign name="team" size={24} color="black" />),
                 headerLeft: () => <AntDesign name="team" size={24} color="black" />,
                 headerLeftContainerStyle: {
                     marginLeft: 10,
                 },
+                title:"Guests"
             }} />
             <Tab.Screen name="Budget" component={TabBudgetScreen} options={{
                 tabBarIcon: () => (<AntDesign name="creditcard" size={24} color="black" />),

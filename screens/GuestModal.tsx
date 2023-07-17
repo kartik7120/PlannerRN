@@ -100,6 +100,10 @@ export default function GuestModal() {
             setFormValue("invitationAccepted", route.params.invitationAccepted as GuestForm["invitationAccepted"] || "Pending");
             setValue(route.params.age || AgeType.Adult);
             setValue2(route.params.gender || "");
+        } else {
+            setFormValue("firstname", route.params.firstname || "");
+            setFormValue("lastname", route.params.lastname || "");
+            setFormValue("phone", route.params.phone || "");
         }
     }, [route.params])
 

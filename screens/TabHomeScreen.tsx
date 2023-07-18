@@ -355,7 +355,10 @@ export default function TabHomeScreen() {
                   <AntDesign name="info" size={24} color="black" />
                   <Text className='text-lg'>{item.name}</Text>
                 </View>
-                <Text>{new Date(item.date.seconds * 1000).toDateString()}</Text>
+                {new Date(item.date.seconds * 1000).toDateString() > new Date().toDateString() &&
+                  <Text>{new Date(item.date.seconds * 1000).toDateString()}</Text>}
+                {new Date(item.date.seconds * 1000).toDateString() < new Date().toDateString() &&
+                  <Text className='text-red-500'>{new Date(item.date.seconds * 1000).toDateString()}</Text>}
               </View>
             </TouchableOpacity>
           ))}

@@ -11,7 +11,7 @@ import {
   PieChart,
 } from "react-native-chart-kit";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, doc, getDoc, getDocs, onSnapshot, query, where } from "firebase/firestore"
+import { DocumentData, collection, doc, getDoc, getDocs, onSnapshot, query, where } from "firebase/firestore"
 import { db } from '../firebase';
 import Tick from "../assets/tick.svg";
 import { useNavigation } from '@react-navigation/native';
@@ -94,6 +94,7 @@ const getCheckListCount = async ({ queryKey }: any) => {
     return {
       count: 0,
       completed: 0,
+      unfinishedItem: []
     };
   }
 
@@ -103,6 +104,7 @@ const getCheckListCount = async ({ queryKey }: any) => {
   const obj = {
     count: 0,
     completed: 0,
+    unfinishedItem: [] as DocumentData[]
   }
 
   snapshot.docs.forEach((doc) => {
@@ -110,6 +112,9 @@ const getCheckListCount = async ({ queryKey }: any) => {
     obj.count++;
     if (data.completed === "Completed") {
       obj.completed++;
+    }
+    if (data.completed === "Pending") {
+      obj.unfinishedItem.push({ ...data, id: doc.id });
     }
   })
 
@@ -153,6 +158,10 @@ export default function TabHomeScreen() {
     queryFn: getCheckListCount,
     enabled: !!currentEventId
   })
+
+  if (checkListCount.status === "success") {
+    console.log(checkListCount.data)
+  }
 
   const eventId = useQuery({
     queryKey: ["currentEventId"],
@@ -330,6 +339,26 @@ export default function TabHomeScreen() {
           marginTop: 5,
         }} />
         <View className='flex flex-col justify-around gap-y-3 mt-1'>
+          {checkListCount.data && checkListCount.data.unfinishedItem.map((item: any) => (
+            <TouchableOpacity key={item.id} onPress={() => {
+              navigation.navigate("CheckListDetail", {
+                name: item.name,
+                note: item.note,
+                category: item.category,
+                date: item.date,
+                completed: item.completed,
+                id: item.id,
+              })
+            }}>
+              <View className='flex flex-row justify-between items-center'>
+                <View className='flex flex-row items-center gap-x-4'>
+                  <AntDesign name="info" size={24} color="black" />
+                  <Text className='text-lg'>{item.name}</Text>
+                </View>
+                <Text>{new Date(item.date.seconds * 1000).toDateString()}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
           <View className='flex flex-col justify-between items-center gap-y-3'>
             <Image source={require("../assets/analytics.png")} style={{ width: 50, height: 50, resizeMode: "contain" }} />
             <Text className='text-center'>There are no uncompleted tasks</Text>

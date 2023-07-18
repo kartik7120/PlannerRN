@@ -62,24 +62,25 @@ const getVendorDetailsFn = async ({ queryKey }: any) => {
     else objVal.rejected++;
     return objVal;
   })
+
   const arr = [
     {
       name: "Reserved",
-      count: objVal.reserved + 100,
+      count: objVal.reserved,
       color: "#F44336",
       legendFontColor: "#7F7F7F",
       legendFontSize: 15
     },
     {
       name: "Pending",
-      count: objVal.pending + 100,
+      count: objVal.pending,
       color: "#FFC107",
       legendFontColor: "#7F7F7F",
       legendFontSize: 15
     },
     {
       name: "Rejected",
-      count: objVal.rejected + 100,
+      count: objVal.rejected,
       color: "#9C27B0",
       legendFontColor: "#7F7F7F",
       legendFontSize: 15
@@ -121,6 +122,64 @@ const getCheckListCount = async ({ queryKey }: any) => {
   return obj;
 }
 
+const getGuestCount = async ({ queryKey }: any) => {
+  const [_key, currentEventId] = queryKey;
+  if (currentEventId === null) {
+    return [] as any[];
+  }
+
+  const colRef = collection(db, "events", currentEventId, "guests");
+  const snapshot = await getDocs(colRef);
+
+  const obj = {
+    count: 0,
+    confirmed: 0,
+    pending: 0,
+    rejected: 0
+  }
+
+  const data = snapshot.docs.map((doc) => {
+    const data = doc.data();
+    obj.count++;
+    if (data.invitationAccepted === "Accepted") {
+      obj.confirmed++;
+    }
+    if (data.invitationAccepted === "Pending") {
+      obj.pending++;
+    }
+    if (data.invitationAccepted === "Declined") {
+      obj.rejected++;
+    }
+    return obj;
+  })
+
+  const arr = [
+    {
+      name: "Accepted",
+      count: obj.confirmed,
+      color: "#F44336",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15
+    },
+    {
+      name: "Pending",
+      count: obj.pending,
+      color: "#FFC107",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15
+    },
+    {
+      name: "Declined",
+      count: obj.rejected,
+      color: "#9C27B0",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15
+    }
+  ]
+
+  return arr;
+}
+
 const loadUserEvents = async ({ queryKey }: any) => {
   const [_key, userId] = queryKey;
   if (userId === null) {
@@ -159,8 +218,14 @@ export default function TabHomeScreen() {
     enabled: !!currentEventId
   })
 
-  if (checkListCount.status === "success") {
-    console.log(checkListCount.data)
+  const guestCount = useQuery({
+    queryKey: ["vendorCount", currentEventId],
+    queryFn: getGuestCount,
+    enabled: !!currentEventId
+  })
+
+  if (guestCount.status === "success") {
+    console.log(guestCount.data);
   }
 
   const eventId = useQuery({
@@ -362,10 +427,10 @@ export default function TabHomeScreen() {
               </View>
             </TouchableOpacity>
           ))}
-          <View className='flex flex-col justify-between items-center gap-y-3'>
+          {!checkListCount.data && <View className='flex flex-col justify-between items-center gap-y-3'>
             <Image source={require("../assets/analytics.png")} style={{ width: 50, height: 50, resizeMode: "contain" }} />
             <Text className='text-center'>There are no uncompleted tasks</Text>
-          </View>
+          </View>}
           <LinearProgress value={checkListCount.data && checkListCount.data.completed} color='red' style={{
             height: 15,
           }} />
@@ -380,7 +445,7 @@ export default function TabHomeScreen() {
         <View className='bg-white w-1/2 border border-transparent rounded-lg overflow-hidden p-2'>
           <View className='flex flex-row gap-x-3 items-center'>
             <Ionicons name="person-outline" size={24} color="black" />
-            <Text>GUESTS</Text>
+            <Text>VENDORS</Text>
           </View>
           <Divider width={0.8} style={{
             marginTop: 5,
@@ -438,17 +503,17 @@ export default function TabHomeScreen() {
           <View className='flex flex-col justify-center items-center'>
             <View className='flex flex-row justify-start gap-x-3 items-center'>
               <View className='bg-rose-600 w-2 h-2 rounded-full'></View>
-              <Text>0</Text>
+              <Text>{vendorDetailsFn.data && vendorDetailsFn.data[0].count}</Text>
               <Text>accepted</Text>
             </View>
             <View className='flex flex-row justify-start gap-x-3 items-center'>
               <View className='bg-yellow-600 w-2 h-2 rounded-full'></View>
-              <Text>0</Text>
+              <Text>{vendorDetailsFn.data && vendorDetailsFn.data[1].count}</Text>
               <Text>pending</Text>
             </View>
             <View className='flex flex-row justify-start gap-x-3 items-center'>
               <View className='bg-purple-600 w-2 h-2 rounded-full'></View>
-              <Text>0</Text>
+              <Text>{vendorDetailsFn.data && vendorDetailsFn.data[2].count}</Text>
               <Text>denied</Text>
             </View>
           </View>
@@ -461,7 +526,7 @@ export default function TabHomeScreen() {
           <Divider width={0.8} style={{
             marginTop: 5,
           }} />
-          <PieChart data={vendorDetailsFn.status === "success" ? vendorDetailsFn.data : [
+          <PieChart data={guestCount.status === "success" ? guestCount.data : [
             {
               name: "Seoul",
               count: 21500000,
@@ -514,18 +579,18 @@ export default function TabHomeScreen() {
           <View className='flex flex-col items-center justify-center'>
             <View className='flex flex-row justify-start gap-x-3 items-center'>
               <View className='bg-rose-600 w-2 h-2 rounded-full'></View>
-              <Text>{vendorDetailsFn.data && vendorDetailsFn.data[0].count}</Text>
-              <Text>reserved</Text>
+              <Text>{guestCount.data && guestCount.data[0].count}</Text>
+              <Text>accepted</Text>
             </View>
             <View className='flex flex-row justify-start gap-x-3 items-center'>
               <View className='bg-yellow-600 w-2 h-2 rounded-full'></View>
-              <Text>{vendorDetailsFn.data && vendorDetailsFn.data[1].count}</Text>
+              <Text>{guestCount.data && guestCount.data[1].count}</Text>
               <Text>pending</Text>
             </View>
             <View className='flex flex-row justify-start gap-x-3 items-center'>
               <View className='bg-purple-600 w-2 h-2 rounded-full'></View>
-              <Text>{vendorDetailsFn.data && vendorDetailsFn.data[2].count}</Text>
-              <Text>denied</Text>
+              <Text>{guestCount.data && guestCount.data[2].count}</Text>
+              <Text>declined</Text>
             </View>
           </View>
         </View>

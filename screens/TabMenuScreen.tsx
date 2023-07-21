@@ -115,18 +115,6 @@ export default function TabMenuScreen() {
             <AntDesign name="right" size={24} color="black" />
           </View>
         </TouchableOpacity>
-        <Divider />
-        <TouchableOpacity onPress={() => {
-          navigation.navigate("Schedule");
-        }}>
-          <View className='flex flex-row justify-between items-center p-2'>
-            <View className='flex flex-row gap-x-3 items-center'>
-              <MaterialIcons name="schedule" size={24} color="black" />
-              <Text className='text-lg font-light'>Schedule</Text>
-            </View>
-            <AntDesign name="right" size={24} color="black" />
-          </View>
-        </TouchableOpacity>
       </View>
       <View className='bg-white m-2 rounded-lg overflow-hidden'>
         <TouchableOpacity onPress={() => {
@@ -136,30 +124,6 @@ export default function TabMenuScreen() {
             <View className='flex flex-row gap-x-3 items-center'>
               <AntDesign name="staro" size={24} color="black" />
               <Text className='text-lg font-light'>Events</Text>
-            </View>
-            <AntDesign name="right" size={24} color="black" />
-          </View>
-        </TouchableOpacity>
-        <Divider />
-        <TouchableOpacity onPress={() => {
-          navigation.navigate("Helpers")
-        }}>
-          <View className='flex flex-row justify-between items-center p-2'>
-            <View className='flex flex-row gap-x-3 items-center'>
-              <MaterialIcons name="groups" size={24} color="black" />
-              <Text className='text-lg font-light'>Helpers</Text>
-            </View>
-            <AntDesign name="right" size={24} color="black" />
-          </View>
-        </TouchableOpacity>
-        <Divider />
-        <TouchableOpacity onPress={() => {
-          navigation.navigate('Messages');
-        }}>
-          <View className='flex flex-row justify-between items-center p-2'>
-            <View className='flex flex-row gap-x-3 items-center'>
-              <AntDesign name="message1" size={24} color="black" />
-              <Text className='text-lg font-light'>Messages</Text>
             </View>
             <AntDesign name="right" size={24} color="black" />
           </View>

@@ -47,7 +47,7 @@ export default function NewEvent(props: Props) {
             const currentEventId = await AsyncStorage.getItem('currentEventId');
             console.log(`current event id is ${currentEventId}`);
             if (currentEventId !== null) {
-                navigation.navigate("Home");
+                navigation.navigate("Home", {});
             }
         }
         checkOneEvent();
@@ -107,7 +107,7 @@ export default function NewEvent(props: Props) {
             } catch (error) {
                 console.log('error occured while creating event', error);
             }
-            navigation.navigate("Home")
+            navigation.navigate("Home", {})
         }
         console.log(data);
     }

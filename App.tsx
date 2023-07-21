@@ -12,9 +12,7 @@ import TabNavigator from './screens/TabNavigator';
 import Vendors from './screens/Vendors';
 import Settings from './screens/Settings';
 import Messages from './screens/Messages';
-import Helpers from './screens/Helpers';
 import Events from './screens/Events';
-import Schedule from './screens/Schedule';
 import BudgetModal from './screens/BudgetModal';
 import GuestModal from './screens/GuestModal';
 import GuestContactModal from './screens/GuestContactModal';
@@ -207,13 +205,7 @@ export default function App() {
               <Stack.Screen name="Messages" component={Messages} options={{
                 presentation: "modal"
               }} />
-              <Stack.Screen name="Helpers" component={Helpers} options={{
-                presentation: "modal"
-              }} />
               <Stack.Screen name="Events" component={Events} options={{
-                presentation: "modal"
-              }} />
-              <Stack.Screen name="Schedule" component={Schedule} options={{
                 presentation: "modal"
               }} />
               <Stack.Screen name="BudgetModal" component={BudgetModal} options={{

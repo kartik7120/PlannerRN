@@ -45,7 +45,6 @@ export default function NewEvent(props: Props) {
     useLayoutEffect(() => {
         async function checkOneEvent() {
             const currentEventId = await AsyncStorage.getItem('currentEventId');
-            console.log(`current event id is ${currentEventId}`);
             if (currentEventId !== null) {
                 navigation.navigate("Home", {});
             }
@@ -63,7 +62,6 @@ export default function NewEvent(props: Props) {
 
     const handleConfirm = (date: any) => {
         setValue("date", date);
-        console.warn("A date has been picked: ", date);
         hideDatePicker();
     };
 
@@ -77,7 +75,6 @@ export default function NewEvent(props: Props) {
 
     const handleTimeConfirm = (time: any) => {
         setValue("time", time)
-        console.warn("A time has been picked: ", time);
         hideTimePicker();
     }
 
@@ -87,7 +84,6 @@ export default function NewEvent(props: Props) {
 
     const submit = async (data: Form) => {
         if (isSignedIn) {
-            console.log('making a new event');
             try {
                 const colRef = collection(db, "events");
                 await addDoc(colRef, {
@@ -100,7 +96,6 @@ export default function NewEvent(props: Props) {
                     try {
                         await AsyncStorage.setItem("currentEventId", data.id);
                     } catch (error) {
-                        console.log('error occured while saving current event id');
                         console.log(error);
                     }
                 })
@@ -109,7 +104,6 @@ export default function NewEvent(props: Props) {
             }
             navigation.navigate("Home", {})
         }
-        console.log(data);
     }
 
     return (

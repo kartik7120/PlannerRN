@@ -13,6 +13,8 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Dropdown } from 'react-native-element-dropdown';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
+import { useUser } from '@clerk/clerk-expo';
+import SignOutDialog from '../components/SignOutDialog';
 
 type NavProps = StackNavigationProp<RootStack>;
 
@@ -21,6 +23,7 @@ interface Form {
   time?: Date;
   budget?: number;
   currency: string;
+  password: string
 }
 
 const setEventName = async ({ eventId, newName }: any) => {
@@ -52,13 +55,15 @@ export default function Settings() {
   const [value, setDropDownValue] = useState<any>(null);
   const [isFocus, setIsFocus] = useState(false);
   const [image, setImage] = useState<any>(null);
-
+  const [visible6, setVisible6] = useState(false)
+  const { user } = useUser();
   const queryClient = useQueryClient();
-  const { control, setValue, getValues } = useForm<Form>({
+  const { control, setValue, getValues, setError } = useForm<Form>({
     defaultValues: {
       name: "",
       time: new Date(),
-      budget: 0
+      budget: 0,
+      password: "",
     }
   })
 
@@ -102,8 +107,6 @@ export default function Settings() {
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
@@ -156,8 +159,37 @@ export default function Settings() {
     mutationFn: setEventName,
   })
 
+  const handlePasswordChange = async () => {
+    try {
+      if (getValues("password") === "" || getValues("password") === null || getValues("password") === undefined) {
+        setError("password", {
+          type: "manual",
+          message: "Password is required"
+        })
+        return;
+      }
+      if (getValues("password").length < 6) {
+        setError("password", {
+          type: "manual",
+          message: "Password must be atleast 6 characters long"
+        })
+        return;
+      }
+      await user?.updatePassword({
+        newPassword: getValues("password")
+      })
+      setVisible5(false)
+    } catch (error: any) {
+      setError("password", {
+        type: "manual",
+        message: error.message
+      })
+    }
+  }
+
   return (
     <ScrollView>
+      <SignOutDialog setVisible={setVisible6} visible={visible6} />
       <Dialog isVisible={visible1} onBackdropPress={() => setVisible1(false)}>
         <Controller control={control} name="name" render={({ field: { onChange, onBlur, value } }) => (
           <Input placeholder="Event Name" value={value} onChangeText={onChange} onBlur={onBlur} />
@@ -167,6 +199,12 @@ export default function Settings() {
           setVisible1(false)
           queryClient.invalidateQueries(['currentEventId'])
         }} title="SAVE" />
+      </Dialog>
+      <Dialog isVisible={visible5} onBackdropPress={() => setVisible5(false)}>
+        <Controller control={control} name="password" render={({ field: { onChange, onBlur, value } }) => (
+          <Input placeholder="Enter Your New Password" value={value} onChangeText={onChange} onBlur={onBlur} />
+        )} />
+        <Button onPress={handlePasswordChange} title="SAVE" />
       </Dialog>
       <Dialog isVisible={visible3} onBackdropPress={() => setVisible3(false)}>
         <Controller control={control} name="budget" render={({ field: { onChange, onBlur, value } }) => (
@@ -202,13 +240,6 @@ export default function Settings() {
           marginVertical: 5
         }} />
         <View className='flex flex-col justify-center items-start w-full gap-y-3'>
-          <View className='flex flex-col gap-y-1'>
-            <Text>Photo</Text>
-            <Text className='text-sm text-gray-500'>Upload your photo</Text>
-          </View>
-          <Divider width={1} style={{
-            marginVertical: 5
-          }} />
           <TouchableOpacity onPress={() => {
             navigation.navigate('ChainNameSettings')
           }}>
@@ -223,20 +254,22 @@ export default function Settings() {
           <Divider width={1} style={{
             marginVertical: 5
           }} />
-          <View className='flex flex-col gap-y-1 bg-gray-100 w-full'>
+          <View className='flex flex-col gap-y-1 bg-gray-100 w-full p-2'>
             <Text>E-mail</Text>
-            <Text className='text-sm text-gray-500'>email id</Text>
+            <Text className='text-sm text-gray-500'>{user && user.primaryEmailAddress?.emailAddress}</Text>
           </View>
           <Divider width={1} style={{
             marginVertical: 5
           }} />
-          <View className='flex flex-row items-center w-full justify-between'>
-            <View className='flex flex-col gap-y-1'>
-              <Text>Password</Text>
-              <Text className='text-sm text-gray-500'>change your password</Text>
+          <TouchableOpacity onPress={() => setVisible5(true)}>
+            <View className='flex flex-row items-center w-full justify-between'>
+              <View className='flex flex-col gap-y-1'>
+                <Text>Password</Text>
+                <Text className='text-sm text-gray-500'>change your password</Text>
+              </View>
+              <AntDesign name="right" size={20} color="black" />
             </View>
-            <AntDesign name="right" size={20} color="black" />
-          </View>
+          </TouchableOpacity>
           <Divider width={1} style={{
             marginVertical: 5
           }} />
@@ -245,7 +278,9 @@ export default function Settings() {
               <Text>Log Out</Text>
               <Text className='text-sm text-gray-500'>Log out of the app</Text>
             </View>
-            <Button title="LOG OUT" />
+            <Button title="LOG OUT" onPress={() => {
+              setVisible6(true)
+            }} />
           </View>
         </View>
       </View>

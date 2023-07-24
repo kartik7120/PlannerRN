@@ -7,6 +7,7 @@ import { Button, Input } from '@rneui/themed';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '../firebase';
+import { useUser } from '@clerk/clerk-expo';
 
 interface Form {
     name: string;
@@ -17,41 +18,23 @@ type RProps = RouteProp<RootStack, 'ChainNameSettings'>;
 export default function ChangeNameModal() {
 
     const route = useRoute<RProps>();
-    const [eventDetail, setEventDetails] = React.useState<any>(null);
     const [eventId, setEventId] = React.useState<string | null>(null);
     const navigation = useNavigation();
+    const { user } = useUser();
 
     const { control, formState: { errors }, handleSubmit, setValue } = useForm<Form>({
         defaultValues: {
-            name: ""
+            name: user?.username || ""
         }
     });
 
-    useLayoutEffect(() => {
-        async function getEventDetails() {
-            const eventId2 = await AsyncStorage.getItem('currentEventId');
-            setEventId(eventId2);
-            if (!eventId2) return;
-            const docRef = doc(db, "events", eventId2);
-            const unsubscribe = onSnapshot(docRef, (doc) => {
-                if (doc.exists()) {
-                    setValue('name', doc.data()?.name);
-                } else {
-                    console.log("No such document!");
-                }
-            })
-            return unsubscribe;
-        }
-        getEventDetails();
-    }, [])
+    console.log(user?.username)
 
     const onSubmit = async (data: Form) => {
         try {
             if (!eventId) return;
-            const docRef = doc(db, "events", eventId);
-            await updateDoc(docRef, {
-                name: data.name
-            })
+            if (!user) return;
+            await user?.update({ username: data.name });
             navigation.goBack();
         } catch (error) {
             console.log(error);

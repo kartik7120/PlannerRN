@@ -26,7 +26,9 @@ export default function BudgetSummaryModal() {
     });
 
     const navigation = useNavigation<NavProps>();
-    const event = useQuery(['currentEvent', { id }], getEventDetails);
+    const event = useQuery(['currentEvent', { id }], getEventDetails, {
+        enabled: !!id
+    });
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -49,7 +51,12 @@ export default function BudgetSummaryModal() {
         <View>
             <View className='bg-white border border-transparent overflow-hidden rounded-lg p-2 m-2'>
                 <View className='flex flex-col gap-y-5 items-center justify-center'>
-                    <Text className='text-lg'>0 spend out of {event.data?.Budget}</Text>
+                    <Text className='text-lg'>0 spend out of {(event.data && event.data?.Budget.toString().toLocaleString("en-US", {
+                        style: 'currency',
+                        currency: event.data && event.data?.currency.value || 'INR',
+                        currencyDisplay: 'narrowSymbol',
+                        useGrouping: true
+                    }))}</Text>
                     <LinearProgress value={0.5} style={{
                         height: 10
                     }} />
@@ -66,21 +73,36 @@ export default function BudgetSummaryModal() {
                         <Text>Budget</Text>
                         <View className='flex flex-row justify-between items-center gap-x-2'>
                             <View className='w-2 h-2 rounded-full bg-gray-500'></View>
-                            <Text>{event.data?.Budget || 0}</Text>
+                            <Text>{(event.data && event.data?.Budget.toString().toLocaleString("en-US", {
+                                style: 'currency',
+                                currency: event.data && event.data?.currency.value || 'INR',
+                                currencyDisplay: 'narrowSymbol',
+                                useGrouping: true
+                            })) || 0}</Text>
                         </View>
                     </View>
                     <View className='flex flex-row justify-between items-center'>
                         <Text>Paid</Text>
                         <View className='flex flex-row justify-between items-center gap-x-2'>
                             <View className='w-2 h-2 rounded-full bg-rose-500'></View>
-                            <Text>$ {event.data?.paid}</Text>
+                            <Text>{(event.data && event.data?.paid.toString().toLocaleString("en-US", {
+                                style: 'currency',
+                                currency: event.data && event.data?.currency.value || 'INR',
+                                currencyDisplay: 'narrowSymbol',
+                                useGrouping: true
+                            }))}</Text>
                         </View>
                     </View>
                     <View className='flex flex-row justify-between items-center'>
                         <Text>Pending</Text>
                         <View className='flex flex-row justify-between items-center gap-x-2'>
                             <View className='w-2 h-2 rounded-full bg-yellow-500'></View>
-                            <Text>$ {event.data?.pending}</Text>
+                            <Text>{(event.data && event.data?.pending.toString().toLocaleString("en-US", {
+                                style: 'currency',
+                                currency: event.data && event.data?.currency.value || 'INR',
+                                currencyDisplay: 'narrowSymbol',
+                                useGrouping: true
+                            }))}</Text>
                         </View>
                     </View>
                 </View>

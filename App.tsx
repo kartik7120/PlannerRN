@@ -48,7 +48,17 @@ export type RootStack = {
   Helpers: undefined;
   Events: undefined;
   Schedule: undefined;
-  BudgetModal: undefined;
+  BudgetModal: {
+    title?: string;
+    id?: string;
+    category?: string;
+    name?: string;
+    amount?: string;
+    paid?: string;
+    pending?: string;
+    note?: string;
+    edit?: boolean;
+  };
   GuestModal: {
     guestId?: string,
     edit?: boolean,

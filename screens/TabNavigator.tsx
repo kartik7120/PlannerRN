@@ -12,13 +12,16 @@ export type RootTab = {
     First: undefined;
     Checklist: undefined;
     Guests: undefined;
-    Budget: undefined;
+    Budget: {
+        tabNavigationNavigation: any;
+    };
     Menu: undefined;
 }
 
 const Tab = createBottomTabNavigator<RootTab>();
 
-const TabNavigator = () => {
+const TabNavigator = (props: any) => {
+    const navigation  = props.navigation;
     return (
         <Tab.Navigator initialRouteName='First'>
             <Tab.Screen name="First" component={TabHomeScreen} options={{
@@ -50,9 +53,11 @@ const TabNavigator = () => {
                 headerLeftContainerStyle: {
                     marginLeft: 10,
                 },
-                title:"Guests"
+                title: "Guests"
             }} />
-            <Tab.Screen name="Budget" component={TabBudgetScreen} options={{
+            <Tab.Screen name="Budget" component={TabBudgetScreen} initialParams={{
+                tabNavigationNavigation: navigation
+            }} options={{
                 tabBarIcon: () => (<AntDesign name="creditcard" size={24} color="black" />),
                 headerLeft: () => <AntDesign name="creditcard" size={24} color="black" />,
                 headerLeftContainerStyle: {

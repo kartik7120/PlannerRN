@@ -1,18 +1,19 @@
 import { View, Text } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Input } from '@rneui/themed'
 import { useForm, Controller } from 'react-hook-form'
 import DropDownPicker from 'react-native-dropdown-picker';
-import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { RootTab } from './TabNavigator';
+import { RouteProp } from "@react-navigation/native";
+import { RootStack } from '../App';
 
 type TabBudgetTypes = BottomTabNavigationProp<RootTab, 'Budget'>
-
+type RoutePramsProps = RouteProp<RootStack, 'BudgetItemModal'>
 
 enum Category {
     Attire = 'Attire',
@@ -32,6 +33,8 @@ interface BudgetFormFields {
     note: string;
     category: Category | null;
     amount: number;
+    paid: number;
+    pending: number;
 }
 
 export default function BudgetModal() {
@@ -45,6 +48,7 @@ export default function BudgetModal() {
         }
     });
     const navigation = useNavigation<TabBudgetTypes>();
+    const route = useRoute<RoutePramsProps>();
 
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
@@ -61,11 +65,21 @@ export default function BudgetModal() {
         { label: 'Unassigned', value: 'Unassigned' },
     ]);
 
+    useEffect(() => {
+        if (route.params && route.params.edit) {
+            setFormField('name', route.params.name);
+            setFormField('note', route.params.note);
+            setFormField('amount', Number(route.params.amount));
+            setFormField('category', route.params.category as Category);
+            setFormField('paid', Number(route.params.paid));
+            setFormField('pending', Number(route.params.pending));
+        }
+    }, [route.params])
+
     const onSubmit = async (data: BudgetFormFields) => {
         try {
             const eventId = await AsyncStorage.getItem('currentEventId')
             if (eventId == null) {
-                console.log("eventId is null")
                 return
             }
             const colRef = collection(db, 'events', eventId, 'budget');
@@ -77,7 +91,29 @@ export default function BudgetModal() {
                 paid: 0,
                 pending: 0,
             });
-            navigation.navigate("Budget");
+            navigation.goBack();
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const onEdit = async (data: BudgetFormFields) => {
+        try {
+            const eventId = await AsyncStorage.getItem('currentEventId')
+            if (eventId == null) {
+                console.log("eventId is null")
+                return
+            }
+            const docRef = doc(db, 'events', eventId, 'budget', route.params.id);
+            await updateDoc(docRef, {
+                category: data.category == null ? Category.Unassigned : data.category,
+                name: data.name,
+                note: data.note,
+                amount: data.amount,
+                paid: data.paid,
+                pending: data.pending,
+            });
+            navigation.goBack();
         } catch (error) {
             console.log('Error adding document: ')
             console.log(error)
@@ -112,9 +148,11 @@ export default function BudgetModal() {
                     setFormField('category', value as Category);
                 }}
             />
-            <Button title="Submit" onPress={handleSubmit(onSubmit)} style={{
-                marginTop: 10,
-            }} />
+            {route.params.edit ?
+                <Button title="Edit" onPress={handleSubmit(onEdit)} /> :
+                <Button title="Submit" onPress={handleSubmit(onSubmit)} style={{
+                    marginTop: 10,
+                }} />}
         </View>
     )
 }

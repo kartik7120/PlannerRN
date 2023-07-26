@@ -328,10 +328,6 @@ export default function TabHomeScreen() {
             <Feather name="menu" size={24} color="black" />
             <Text className='text-lg'>MENU</Text>
           </View>
-          <TouchableOpacity className='flex flex-row gap-x-1 items-center justify-center'>
-            <Text className='text-black text-lg'>More</Text>
-            <AntDesign name="right" size={18} color="black" />
-          </TouchableOpacity>
         </View>
         <Divider width={0.8} style={{
           marginTop: 5,
@@ -347,7 +343,11 @@ export default function TabHomeScreen() {
                 <Image source={require("../assets/task_list.png")} style={{ width: 50, height: 50, resizeMode: "contain" }} />
                 <Text>Checklist</Text>
               </TouchableOpacity>
-              <TouchableOpacity className='flex flex-col justify-center items-center max-w-fit gap-y-2'>
+              <TouchableOpacity className='flex flex-col justify-center items-center max-w-fit gap-y-2' onPress={() => {
+                navigation.navigate("Home", {
+                  screen: "Guest"
+                })
+              }}>
                 <Image source={require("../assets/guest.png")} style={{ width: 50, height: 50, resizeMode: "contain" }} />
                 <Text>Guest</Text>
               </TouchableOpacity>
@@ -371,7 +371,9 @@ export default function TabHomeScreen() {
                 <Image source={require("../assets/schedule.png")} style={{ width: 50, height: 50, resizeMode: "contain" }} />
                 <Text>Schedule</Text>
               </TouchableOpacity>
-              <TouchableOpacity className='flex flex-col justify-center items-center max-w-fit gap-y-2'>
+              <TouchableOpacity className='flex flex-col justify-center items-center max-w-fit gap-y-2' onPress={() => {
+                navigation.navigate("Events")
+              }}>
                 <Image source={require("../assets/billboard.png")} style={{ width: 50, height: 50, resizeMode: "contain" }} />
                 <Text>Events</Text>
               </TouchableOpacity>
@@ -616,21 +618,36 @@ export default function TabHomeScreen() {
             <Text>Budget</Text>
             <View className='flex flex-row justify-between items-center gap-x-2'>
               <View className='w-2 h-2 rounded-full bg-gray-500'></View>
-              <Text>{loadEvent.data?.Budget}</Text>
+              <Text>{(loadEvent.data && loadEvent.data?.Budget.toString().toLocaleString("en-US", {
+                style: 'currency',
+                currency: loadEvent.data?.currency.value || 'INR',
+                currencyDisplay: 'narrowSymbol',
+                useGrouping: true
+              }))}</Text>
             </View>
           </View>
           <View className='flex flex-row justify-between items-center'>
             <Text>Paid</Text>
             <View className='flex flex-row justify-between items-center gap-x-2'>
               <View className='w-2 h-2 rounded-full bg-rose-500'></View>
-              <Text>$ {loadEvent.data?.paid}</Text>
+              <Text>{(loadEvent.data && loadEvent.data?.paid.toString().toLocaleString("en-US", {
+                style: 'currency',
+                currency: loadEvent.data?.currency.value || 'INR',
+                currencyDisplay: 'narrowSymbol',
+                useGrouping: true
+              }))}</Text>
             </View>
           </View>
           <View className='flex flex-row justify-between items-center'>
             <Text>Pending</Text>
             <View className='flex flex-row justify-between items-center gap-x-2'>
               <View className='w-2 h-2 rounded-full bg-yellow-500'></View>
-              <Text>$ {loadEvent.data?.pending}</Text>
+              <Text>{(loadEvent.data && loadEvent.data?.pending.toString().toLocaleString("en-US", {
+                style: 'currency',
+                currency: loadEvent.data?.currency.value || 'INR',
+                currencyDisplay: 'narrowSymbol',
+                useGrouping: true
+              }))}</Text>
             </View>
           </View>
         </View>

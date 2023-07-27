@@ -10,22 +10,41 @@ import { RootTab } from './TabNavigator';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { RootStack } from '../App';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 type MenuScreenProps = CompositeNavigationProp<
   BottomTabNavigationProp<RootTab, 'Menu'>,
   StackNavigationProp<RootStack>
 >
 
+const loadEvent = async ({ queryKey }: any) => {
+  const [_key, { id }] = queryKey;
+  const docRef = doc(db, 'events', id);
+  const docSnap = await getDoc(docRef);
+  return docSnap.data();
+}
+
 export default function TabMenuScreen() {
 
   const navigation = useNavigation<MenuScreenProps>();
+  const queryClient = useQueryClient();
+
+  const id = queryClient.getQueryData(['currentEventId'], {
+    exact: true
+  });
+
+  const event = useQuery(['event', { id }], loadEvent, {
+    enabled: !!id
+  })
 
   return (
     <ScrollView>
       {/* Upper part */}
       <View className='bg-white rounded-md overflow-hidden m-2'>
         <View className='flex flex-col gap-y-0.5 items-center p-3'>
-          <Image source={{ uri: 'https://i.imgur.com/2xRJYUS.png' }} style={{
+          <Image source={{ uri: event.data && event.data.image }} style={{
             width: 100,
             height: 100,
             borderRadius: 100,
@@ -42,14 +61,17 @@ export default function TabMenuScreen() {
               style={{ width: 50, height: 50, borderRadius: 50 / 2 }}
             />
             <View>
-              <Text className='text-lg text-black'>Event title</Text>
+              <Text className='text-lg text-black'>{event.data && event.data.name}</Text>
               <View className='flex flex-row gap-x-2'>
-                <Text className='text-gray-400'>Date</Text>
-                <Text className='text-gray-400'>Your event</Text>
+                <Text className='text-gray-400'>{event.data && new Date(event.data.date.seconds * 1000).toDateString()}</Text>
               </View>
             </View>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => {
+            queryClient.invalidateQueries(["currentEventId"], {
+              exact: true
+            });
+          }}>
             <Feather name="refresh-ccw" size={24} color="black" />
           </TouchableOpacity>
         </View>
@@ -93,7 +115,7 @@ export default function TabMenuScreen() {
         </TouchableOpacity>
         <Divider />
         <TouchableOpacity onPress={() => {
-          navigation.navigate('Budget',{
+          navigation.navigate('Budget', {
             tabNavigationNavigation: navigation
           });
         }}>

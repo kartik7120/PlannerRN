@@ -137,18 +137,6 @@ const LogInDialog = (props: LogInDialogProps) => {
                         <Text className='text-xl font-normal text-center'>Authorization</Text>
                         <Text className='text-center'>Sign up or log in and start organizing your event</Text>
                     </View>
-                    <View className='flex flex-row justify-evenly w-full items-center'>
-                        <Button radius="md" title={<Text className='font-semibold text-black'>Google</Text>}
-                            color="white" onPress={onPress} icon={<Ionicons name="logo-google" size={24} />} containerStyle={{
-                                borderWidth: 1,
-                                borderColor: 'gray',
-                                width: 128,
-                            }} buttonStyle={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                justifyContent: 'space-evenly',
-                            }} />
-                    </View>
                     <Divider width={1} />
                     <View>
                         {!pendingVerification && (

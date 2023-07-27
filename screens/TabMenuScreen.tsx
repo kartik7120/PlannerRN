@@ -93,7 +93,9 @@ export default function TabMenuScreen() {
         </TouchableOpacity>
         <Divider />
         <TouchableOpacity onPress={() => {
-          navigation.navigate('Budget');
+          navigation.navigate('Budget',{
+            tabNavigationNavigation: navigation
+          });
         }}>
           <View className='flex flex-row justify-between items-center p-2'>
             <View className='flex flex-row gap-x-3 items-center'>

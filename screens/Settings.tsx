@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, useWindowDimensions } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { AntDesign } from '@expo/vector-icons';
 import { Button, Dialog, Divider, Input } from '@rneui/themed';
@@ -58,6 +58,7 @@ export default function Settings() {
   const [visible6, setVisible6] = useState(false)
   const { user } = useUser();
   const queryClient = useQueryClient();
+
   const { control, setValue, getValues, setError } = useForm<Form>({
     defaultValues: {
       name: "",
@@ -99,6 +100,24 @@ export default function Settings() {
     hideTimePicker();
   }
 
+  const getBlobFroUri = async (uri: string) => {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+
+    return blob;
+  };
+
+
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -106,11 +125,12 @@ export default function Settings() {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      base64: true
     });
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-      uploadImage(result.assets[0].uri)
+      uploadImage(result.assets[0].uri);
     }
   };
 
@@ -142,13 +162,15 @@ export default function Settings() {
     try {
       //upload image to firebase storage and save the image in firestore
       const storageRef = ref(storage, `events/${eventId}/images/`);
-      await uploadBytes(storageRef, image).then((snapshot) => {
+      const imageBlob = await getBlobFroUri(image);
+      await uploadBytes(storageRef, imageBlob as any).then((snapshot) => {
         console.log('Uploaded a blob or file!');
         getDownloadURL(snapshot.ref).then(async (url) => {
           await updateDoc(doc(db, 'events', eventId), {
             image: url
           })
         })
+        queryClient.invalidateQueries(['event']);
       });
     } catch (error) {
       console.log(error)

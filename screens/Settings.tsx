@@ -268,7 +268,7 @@ export default function Settings() {
             <View className='flex flex-row items-center justify-between w-full'>
               <View className='flex flex-col gap-y-1'>
                 <Text>Name</Text>
-                <Text className='text-sm text-gray-500'>username</Text>
+                <Text className='text-sm text-gray-500'>{user?.username}</Text>
               </View>
               <AntDesign name="right" size={24} color="black" />
             </View>

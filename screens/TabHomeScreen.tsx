@@ -224,10 +224,6 @@ export default function TabHomeScreen() {
     enabled: !!currentEventId
   })
 
-  if (guestCount.status === "success") {
-    console.log(guestCount.data);
-  }
-
   const eventId = useQuery({
     queryKey: ["currentEventId"],
     queryFn: getEventId,
@@ -258,7 +254,9 @@ export default function TabHomeScreen() {
         <Timer />
         {!visible && <View className='flex flex-row justify-between items-center w-full p-2 bg-white'>
           <View className=' flex flex-row gap-x-3'>
-            <Image source={require("../assets/event_icon.jpg")}
+            <Image source={{
+              uri: loadEvent.data && loadEvent.data.image
+            }}
               style={{ width: 50, height: 50, borderRadius: 50 / 2 }}
             />
             <View>
@@ -293,7 +291,9 @@ export default function TabHomeScreen() {
             }}>
               <View className='flex flex-row justify-between items-center w-full p-2 bg-white' >
                 <View className=' flex flex-row gap-x-3'>
-                  <Image source={require("../assets/event_icon.jpg")}
+                  <Image source={{
+                    uri: event.image || null
+                  }}
                     style={{ width: 50, height: 50, borderRadius: 50 / 2 }}
                   />
                   <View>

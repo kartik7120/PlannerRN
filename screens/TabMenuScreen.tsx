@@ -13,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useUser } from '@clerk/clerk-expo';
 
 type MenuScreenProps = CompositeNavigationProp<
   BottomTabNavigationProp<RootTab, 'Menu'>,
@@ -30,7 +31,7 @@ export default function TabMenuScreen() {
 
   const navigation = useNavigation<MenuScreenProps>();
   const queryClient = useQueryClient();
-
+  const { user } = useUser();
   const id = queryClient.getQueryData(['currentEventId'], {
     exact: true
   });
@@ -51,8 +52,8 @@ export default function TabMenuScreen() {
             borderColor: 'gray',
             borderWidth: 2,
           }} />
-          <Text className='text-lg font-semibold'>Username</Text>
-          <Text className='text-sm font-light'>Email</Text>
+          <Text className='text-lg font-semibold'>{user?.username}</Text>
+          <Text className='text-sm font-light'>{user?.emailAddresses[0].emailAddress}</Text>
         </View>
         <Divider />
         <View className='flex flex-row justify-between items-center w-full p-2 bg-white'>

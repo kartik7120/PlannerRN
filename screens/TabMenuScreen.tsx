@@ -44,7 +44,7 @@ export default function TabMenuScreen() {
       {/* Upper part */}
       <View className='bg-white rounded-md overflow-hidden m-2'>
         <View className='flex flex-col gap-y-0.5 items-center p-3'>
-          <Image source={{ uri: event.data && event.data.image }} style={{
+          <Image source={{ uri: event.data && event.data.image || null }} style={{
             width: 100,
             height: 100,
             borderRadius: 100,

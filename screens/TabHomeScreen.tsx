@@ -618,36 +618,36 @@ export default function TabHomeScreen() {
             <Text>Budget</Text>
             <View className='flex flex-row justify-between items-center gap-x-2'>
               <View className='w-2 h-2 rounded-full bg-gray-500'></View>
-              <Text>{(loadEvent.data && loadEvent.data?.Budget.toString().toLocaleString("en-US", {
+              {/* <Text>{(loadEvent.data && loadEvent.data?.Budget.toString().toLocaleString("en-US", {
                 style: 'currency',
                 currency: loadEvent.data?.currency.value || 'INR',
                 currencyDisplay: 'narrowSymbol',
                 useGrouping: true
-              }))}</Text>
+              }))}</Text> */}
             </View>
           </View>
           <View className='flex flex-row justify-between items-center'>
             <Text>Paid</Text>
             <View className='flex flex-row justify-between items-center gap-x-2'>
               <View className='w-2 h-2 rounded-full bg-rose-500'></View>
-              <Text>{(loadEvent.data && loadEvent.data?.paid.toString().toLocaleString("en-US", {
+              {/* <Text>{(loadEvent.data && loadEvent.data?.paid.toString().toLocaleString("en-US", {
                 style: 'currency',
-                currency: loadEvent.data?.currency.value || 'INR',
+                currency: loadEvent.data?.currency?.value || 'INR',
                 currencyDisplay: 'narrowSymbol',
                 useGrouping: true
-              }))}</Text>
+              }))}</Text> */}
             </View>
           </View>
           <View className='flex flex-row justify-between items-center'>
             <Text>Pending</Text>
             <View className='flex flex-row justify-between items-center gap-x-2'>
               <View className='w-2 h-2 rounded-full bg-yellow-500'></View>
-              <Text>{(loadEvent.data && loadEvent.data?.pending.toString().toLocaleString("en-US", {
+              {/* <Text>{(loadEvent.data && loadEvent.data?.pending.toString().toLocaleString("en-US", {
                 style: 'currency',
                 currency: loadEvent.data?.currency.value || 'INR',
                 currencyDisplay: 'narrowSymbol',
                 useGrouping: true
-              }))}</Text>
+              }))}</Text> */}
             </View>
           </View>
         </View>

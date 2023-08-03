@@ -147,6 +147,9 @@ export default function Events({ route }: any) {
           date: data.date,
           time: data.time,
           userId: arrayUnion(user?.id),
+          currency: "INR",
+          paid: 0,
+          pending: 0
         }).then(async (data) => {
           try {
             await AsyncStorage.setItem("currentEventId", data.id);

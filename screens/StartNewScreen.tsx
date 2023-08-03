@@ -6,7 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 import { RootStack } from '../App';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Confetti from '../components/Confetti';
 import NewEvent from '../components/NewEvent';
 import { StatusBar } from 'expo-status-bar';
 import SignOutDialog from '../components/SignOutDialog';
@@ -111,7 +110,6 @@ export default function StartNewScreen() {
                     <Button title="CREATE A NEW EVENT" className='mt-5' onPress={() => setVisible(true)} />
                     <Button title="JOIN AN EXISTING EVENT" onPress={() => setVisible2(true)} />
                 </View>
-                <Confetti />
                 <NewEvent visible={visible} setVisible={setVisible} />
                 <View className='flex flex-col gap-y-2 justify-end items-center  justify-self-end border border-red-600'>
                     <Text className='text-black'>{user && user.emailAddresses[0].emailAddress}</Text>

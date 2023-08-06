@@ -157,6 +157,10 @@ export default function Events({ route }: any) {
               queryKey: ["currentEventId"],
               exact: true
             })
+            queryClient.invalidateQueries({
+              queryKey: ["currentEvent"],
+              exact: true
+            })
           } catch (error) {
             console.log('error occured while saving current event id');
             console.log(error);

@@ -8,6 +8,7 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { RootStack } from '../App';
 import { addDoc, collection, doc, getDoc, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Form {
     name: string;
@@ -32,7 +33,7 @@ export default function PaymentModal() {
     })
 
     const oldVal = useRef<number>(0);
-
+    const queryClient = useQueryClient();
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
     const [items, setItems] = useState([
@@ -110,6 +111,9 @@ export default function PaymentModal() {
                     pending: eventDoc.data()?.pending + parseInt(data.amount) - oldVal.current,
                 })
             }
+            queryClient.invalidateQueries(['currentEvent'], {
+                exact: true
+            })
             navigation.goBack();
         } catch (error) {
             console.error("Error adding document: ", error);

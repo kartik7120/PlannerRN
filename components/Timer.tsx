@@ -31,11 +31,13 @@ export default function Timer() {
         exact: true
     });
 
-    const eventDetailQuery = useQuery(['eventDetailTimer',eventId as string], getEventDetail);
+    const eventDetailQuery = useQuery(['eventDetailTimer', eventId as string], getEventDetail, {
+        enabled: !!eventId
+    });
 
     useEffect(() => {
         if (!eventDetailQuery.data) return;
-        let date1 = new Date(eventDetailQuery.data.time.seconds * 1000);
+        let date1 = new Date(eventDetailQuery.data.date.seconds * 1000);
         const clearIternval = setInterval(() => {
             const date2 = new Date();
             const diffTime = Math.abs(date2.getTime() - date1.getTime());

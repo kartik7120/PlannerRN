@@ -94,7 +94,7 @@ export default function StartNewScreen() {
                 {errors.code && <Text className='text-red-600'>This is required.</Text>}
                 <Button title="JOIN" onPress={handleSubmit(onSubmit)} />
             </Dialog>
-            <View className='flex flex-col justify-center items-center h-full gap-y-5 border border-red-700'>
+            <View className='flex flex-col justify-center items-center h-full gap-y-5'>
                 <Image source={require("../assets/gift_image.png")} style={{
                     width: 150,
                     height: 150,
@@ -106,12 +106,12 @@ export default function StartNewScreen() {
                     <Text className='text-black text-lg text-center'>You have successfully registered.</Text>
                     <Text className='text-black text-lg text-center'>Create your first event or join a friend's event</Text>
                 </View>
-                <View className='border-2 border-red-600 flex flex-col max-h-max gap-y-5'>
+                <View className='flex flex-col max-h-max gap-y-5'>
                     <Button title="CREATE A NEW EVENT" className='mt-5' onPress={() => setVisible(true)} />
                     <Button title="JOIN AN EXISTING EVENT" onPress={() => setVisible2(true)} />
                 </View>
                 <NewEvent visible={visible} setVisible={setVisible} />
-                <View className='flex flex-col gap-y-2 justify-end items-center  justify-self-end border border-red-600'>
+                <View className='flex flex-col gap-y-2 justify-end items-center  justify-self-end '>
                     <Text className='text-black'>{user && user.emailAddresses[0].emailAddress}</Text>
                     <Text className='text-gray-500 underline' onPress={() => {
                         setIsVisible(true);

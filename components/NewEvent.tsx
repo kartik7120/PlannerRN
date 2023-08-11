@@ -91,7 +91,10 @@ export default function NewEvent(props: Props) {
                     Budget: data.Budget,
                     date: data.date,
                     time: data.time,
-                    userId: user?.id
+                    userId: user?.id,
+                    paid: 0,
+                    pending: 0,
+                    currency: "INR",
                 }).then(async (data) => {
                     try {
                         await AsyncStorage.setItem("currentEventId", data.id);
